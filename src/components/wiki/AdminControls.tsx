@@ -6,18 +6,21 @@ import NoteModal from './NoteModal'
 
 interface AdminControlsProps {
   sectorId: number
+  className?: string
+  label?: string
 }
 
-export default function AdminControls({ sectorId }: AdminControlsProps) {
+export default function AdminControls({ sectorId, className, label = '키워드카드 추가' }: AdminControlsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 bg-foreground text-background rounded-full shadow-2xl shadow-foreground/20 flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 group"
+        className={className ?? "fixed bottom-8 right-8 h-12 rounded-xl border border-border bg-background px-4 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent z-50 inline-flex items-center gap-2"}
       >
-        <Plus className="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" />
+        <Plus className="w-4 h-4" />
+        <span>{label}</span>
       </button>
 
       <NoteModal 

@@ -138,15 +138,13 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
             <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
               {SIDEBAR_CATEGORIES.find(c => c.id === activeCategoryId)?.name}
             </h2>
-            {isAdmin && (
-              <button 
-                onClick={() => setIsAdding(true)}
-                className="p-1 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors"
-                title="기술 스택 추가"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            )}
+            <button 
+              onClick={() => setIsAdding(true)}
+              className="p-1 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors"
+              title="기술 스택 추가"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
           </div>
 
           <nav className="space-y-1">
@@ -201,30 +199,29 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
                         )}
                       </button>
                       
-                      {/* 수정/삭제 버튼 (관리자용) */}
-                      {isAdmin && (
-                        <div className="absolute right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setEditingSectorId(sector.id)
-                              setEditValue(sector.name)
-                            }}
-                            className="p-1 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            <Edit2 className="w-3 h-3" />
-                          </button>
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDeleteSector(sector.id)
-                            }}
-                            className="p-1 hover:bg-red-500/10 rounded text-muted-foreground hover:text-red-500 transition-colors"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      )}
+                      <div className="absolute right-2 flex items-center gap-1">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setEditingSectorId(sector.id)
+                            setEditValue(sector.name)
+                          }}
+                          className="p-1 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors"
+                          title="수정"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteSector(sector.id)
+                          }}
+                          className="p-1 hover:bg-red-500/10 rounded text-muted-foreground hover:text-red-500 transition-colors"
+                          title="삭제"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

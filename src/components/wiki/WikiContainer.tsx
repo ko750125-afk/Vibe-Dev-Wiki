@@ -1,19 +1,11 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { Search, SlidersHorizontal, Info, X, Zap } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import WikiCard from './WikiCard'
 import EmptyState from './EmptyState'
 import AdminControls from './AdminControls'
 import { WikiNote, WikiSector } from '@/lib/types'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
 
 interface WikiContainerProps {
   initialNotes: WikiNote[]
@@ -22,11 +14,8 @@ interface WikiContainerProps {
   isAdmin: boolean
 }
 
-const STAGES = ['All', 'Step 1', 'Step 2', 'Step 3', 'Step 4', 'Step 5']
-
 export default function WikiContainer({ initialNotes, initialSectors, currentSectorId, isAdmin }: WikiContainerProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedStage, setSelectedStage] = useState('All')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   // 현재 선택된 섹터 정보 (DB 데이터에서 찾음)
@@ -46,7 +35,7 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  // 🟢 필터링 로직: 검색어가 있으면 위키 전체 검색, 없으면 섹터+단계 필터링
+  // 검색어가 있으면 전체 검색, 없으면 현재 섹터 기준으로 표시
   const filteredNotes = useMemo(() => {
     return initialNotes.filter(note => {
       const searchLower = searchQuery.toLowerCase()
@@ -55,16 +44,14 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
         note.content.toLowerCase().includes(searchLower) ||
         note.stage_name.toLowerCase().includes(searchLower)
 
-      // 1. 검색어가 입력된 경우: 위키 전체에서 제목/본문 검색 (섹터/단계 필터 무시)
+      // 검색어가 입력된 경우: 위키 전체 검색
       if (searchQuery !== '') return matchesSearch
 
-      // 2. 검색어가 없는 경우: 현재 선택된 섹터 및 단계 필터 적용
+      // 검색어가 없는 경우: 현재 섹터 필터 적용
       const matchesSector = note.sector_id === currentSectorId
-      const matchesStage = selectedStage === 'All' || note.stage_name === selectedStage
-
-      return matchesSector && matchesStage
+      return matchesSector
     })
-  }, [initialNotes, searchQuery, selectedStage, currentSectorId])
+  }, [initialNotes, searchQuery, currentSectorId])
 
   return (
     <main className="flex-1 overflow-y-auto pb-20 custom-scrollbar bg-background">
@@ -104,43 +91,11 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground hover:bg-accent transition-colors"
-                title="단계 필터"
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-                <span>{selectedStage}</span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuLabel>Stage Filter</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {STAGES.map((stage) => (
-                <DropdownMenuItem
-                  key={stage}
-                  onClick={() => setSelectedStage(stage)}
-                  className="flex items-center justify-between"
-                >
-                  <span>{stage}</span>
-                  {stage === selectedStage && <Zap className="w-3.5 h-3.5 text-primary" />}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {searchQuery && (
-            <div
-              className="hidden lg:inline-flex items-center gap-1.5 rounded-xl border border-border bg-secondary px-2.5 py-2 text-[11px] text-muted-foreground"
-              title="검색 시 섹터/단계 필터는 적용되지 않습니다"
-            >
-              <Info className="w-3 h-3" />
-              <span>검색 중 단계 필터 비활성</span>
-            </div>
-          )}
+        <div className="w-[180px] flex justify-end">
+          <AdminControls
+            sectorId={currentSectorId}
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
+          />
         </div>
       </header>
 
@@ -173,15 +128,11 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
               isAdmin={isAdmin} 
               onReset={() => {
                 setSearchQuery('')
-                setSelectedStage('All')
               }}
             />
           </div>
         )}
       </div>
-
-      {/* Floating Admin Controls */}
-      {isAdmin && <AdminControls sectorId={currentSectorId} />}
     </main>
   )
 }

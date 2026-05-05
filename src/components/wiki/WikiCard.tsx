@@ -1,12 +1,9 @@
-import { ShieldAlert, Key, Terminal, Lightbulb, Copy, Check, Trash2, Edit3, Eye, Zap } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { deleteNote } from '@/app/actions'
 import NoteModal from './NoteModal'
 import ViewNoteModal from './ViewNoteModal'
 import { BlockType } from '@/lib/types'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 
 interface WikiCardProps {
   id: string
@@ -21,37 +18,6 @@ interface WikiCardProps {
   searchTerm?: string
 }
 
-const STYLES = {
-  security: {
-    icon: ShieldAlert,
-    borderColor: 'border-border',
-    bgColor: 'bg-background',
-    iconColor: 'text-red-500/70',
-    label: 'SECURITY',
-  },
-  config: {
-    icon: Key,
-    borderColor: 'border-border',
-    bgColor: 'bg-background',
-    iconColor: 'text-muted-foreground',
-    label: 'CONFIG',
-  },
-  command: {
-    icon: Terminal,
-    borderColor: 'border-slate-800 dark:border-slate-700',
-    bgColor: 'bg-slate-900 dark:bg-slate-950',
-    iconColor: 'text-slate-400',
-    label: 'COMMAND',
-  },
-  tip: {
-    icon: Lightbulb,
-    borderColor: 'border-border',
-    bgColor: 'bg-background',
-    iconColor: 'text-muted-foreground',
-    label: 'TIP',
-  },
-}
-
 export default function WikiCard({ 
   id, 
   title, 
@@ -64,12 +30,10 @@ export default function WikiCard({
   sectorName,
   searchTerm 
 }: WikiCardProps) {
-  const [copied, setCopied] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isViewOpen, setIsViewOpen] = useState(false)
-  
-  const style = STYLES[block_type]
+  const hiddenText = ''
 
   const HighlightText = ({ text, query }: { text: string; query?: string }) => {
     if (!query?.trim()) return <>{text}</>
@@ -88,17 +52,6 @@ export default function WikiCard({
         ))}
       </>
     )
-  }
-
-  const handleCopy = async (e: React.MouseEvent) => {
-    e.stopPropagation()
-    try {
-      await navigator.clipboard.writeText(content)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy!', err)
-    }
   }
 
   const handleDelete = async (e?: React.MouseEvent) => {
@@ -127,52 +80,37 @@ export default function WikiCard({
       <div 
         onClick={() => setIsViewOpen(true)}
         className={cn(
-          "group relative overflow-hidden rounded-[24px] border-2 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 cursor-pointer",
-          style.borderColor,
-          style.bgColor,
+          "group relative flex h-52 cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-background transition-colors hover:bg-accent/30",
           isDeleting && "opacity-50 grayscale pointer-events-none"
         )}
       >
-        {/* Content */}
-        <div className="p-8 pt-10">
-          <h3 className={cn(
-            "font-black text-xl mb-3 leading-tight tracking-tight",
-            block_type === 'command' ? "text-slate-100" : "text-foreground"
-          )}>
-            <HighlightText text={title} query={searchTerm} />
+        <div className="p-5">
+          <h3 className="line-clamp-2 text-base font-semibold leading-snug text-foreground">
+            <HighlightText text={hiddenText} query={searchTerm} />
           </h3>
-          
-          <div className={cn(
-            "text-sm leading-relaxed line-clamp-3 prose prose-sm max-w-none mb-4",
-            block_type === 'command' ? "prose-invert text-slate-400 font-mono" : "text-muted-foreground"
-          )}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {content.replace(/\\n/g, '\n')}
-            </ReactMarkdown>
-          </div>
         </div>
 
-
-        {/* Footer Decoration */}
-        <div className={cn(
-          "h-1 w-full",
-          block_type === 'command' ? "bg-slate-800" : "bg-border"
-        )} />
+        <div className="mx-5 border-t border-border" />
+        <div className="flex-1 p-5 pt-4">
+          <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+            <HighlightText text={hiddenText} query={searchTerm} />
+          </p>
+        </div>
       </div>
 
       {/* Modals */}
       <ViewNoteModal
         isOpen={isViewOpen}
         onClose={() => setIsViewOpen(false)}
-        onEdit={isAdmin ? () => {
+        onEdit={() => {
           setIsViewOpen(false)
           setIsEditOpen(true)
-        } : undefined}
-        onDelete={isAdmin ? handleDelete : undefined}
-        note={{ title, content, block_type, stage_name, created_at }}
+        }}
+        onDelete={handleDelete}
+        note={{ title: hiddenText, content: hiddenText, block_type, stage_name: hiddenText, created_at }}
       />
 
-      {isAdmin && isEditOpen && (
+      {isEditOpen && (
         <NoteModal
           sectorId={sectorId}
           isOpen={isEditOpen}

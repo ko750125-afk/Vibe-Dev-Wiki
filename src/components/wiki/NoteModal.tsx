@@ -182,31 +182,40 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
         hideClose 
-        className="max-w-[95vw] w-[95vw] bg-background border-border rounded-[32px] p-0 overflow-hidden shadow-2xl flex flex-col h-[90vh]"
+        className="max-w-[95vw] w-[95vw] bg-background border-border rounded-[24px] p-0 overflow-hidden shadow-2xl flex flex-col h-[90vh]"
       >
         <div className="sr-only">
           <DialogTitle>{initialData ? '지식 수정' : '새 지식 등록'}</DialogTitle>
           <DialogDescription>개발 지식을 기록하고 관리하는 모달입니다.</DialogDescription>
         </div>
 
-        {/* Header */}
-        <DialogHeader className="px-10 py-6 border-b border-border bg-muted/50 shrink-0">
-          <input
-            required
-            type="text"
-            value={formData.title}
-            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            placeholder="지식의 제목을 입력하세요"
-            className="w-full bg-transparent border-none outline-none font-black text-3xl text-foreground placeholder:text-muted-foreground/30"
-          />
-        </DialogHeader>
-
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden bg-background">
-          <div className="flex-1 grid grid-cols-2 overflow-hidden">
-            
-            {/* Editor Section */}
-            <div className="flex flex-col min-w-0 border-r border-border bg-background overflow-hidden">
-              <div className="flex-1 relative flex flex-col overflow-hidden">
+          <div className="flex-1 grid grid-rows-[auto_auto_1fr] overflow-hidden">
+            <DialogHeader className="px-8 py-5 border-b border-border bg-background shrink-0">
+              <input
+                required
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="제목"
+                className="w-full bg-transparent border-none outline-none text-2xl font-semibold text-foreground placeholder:text-muted-foreground"
+              />
+            </DialogHeader>
+
+            <div className="px-8 py-4 border-b border-border bg-background shrink-0">
+              <textarea
+                required
+                rows={2}
+                maxLength={160}
+                value={formData.stage_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, stage_name: e.target.value }))}
+                placeholder="설명 (최대 2줄)"
+                className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm leading-relaxed text-foreground outline-none focus:ring-2 focus:ring-ring/20 placeholder:text-muted-foreground"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 overflow-hidden">
+              <div className="flex flex-col min-w-0 border-r border-border bg-background overflow-hidden">
                 <textarea
                   ref={editorRef}
                   required
@@ -219,12 +228,12 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
                     if (file) await handleImageUpload(file)
                   }}
                   onDragOver={(e) => e.preventDefault()}
-                  placeholder="이곳에 지식의 내용을 마음껏 펼쳐보세요..."
-                  className="flex-1 w-full bg-transparent px-10 py-10 outline-none font-medium text-foreground placeholder:text-muted-foreground/20 resize-none custom-scrollbar leading-relaxed text-lg"
+                  placeholder="내용"
+                  className="flex-1 w-full bg-background px-8 py-8 outline-none font-medium text-foreground placeholder:text-muted-foreground resize-none custom-scrollbar leading-relaxed text-base"
                 />
                 
                 {/* Toolbar */}
-                <div className="flex items-center gap-1 p-4 bg-muted/30 border-t border-border shrink-0">
+                <div className="flex items-center gap-1 p-3 bg-muted/20 border-t border-border shrink-0">
                   <div className="flex items-center gap-0.5 pr-4 mr-4 border-r border-border">
                     {TOOLBAR_CONFIG.headings.map((tool, i) => (
                       <ToolbarButton key={i} tool={tool} onAction={handleEditorAction} />
@@ -264,32 +273,31 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Preview Section */}
-            <div className="flex flex-col bg-muted/5 overflow-hidden">
-              <div ref={previewRef} className="flex-1 overflow-y-auto px-10 py-10 custom-scrollbar">
-                <MarkdownPreview content={formData.content} />
-              </div>
+              <div className="flex flex-col bg-background overflow-hidden">
+                <div ref={previewRef} className="flex-1 overflow-y-auto px-8 py-8 custom-scrollbar">
+                  <MarkdownPreview content={formData.content} />
+                </div>
 
-              {/* Action Buttons */}
-              <div className="p-8 border-t border-border bg-muted/20 shrink-0">
-                <div className="flex gap-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onClose}
-                    className="flex-1 h-14 rounded-2xl font-black text-xs tracking-widest border-2 border-border hover:bg-background text-muted-foreground hover:text-foreground transition-all shadow-sm"
-                  >
-                    CANCEL
-                  </Button>
-                  <Button
-                    disabled={loading}
-                    type="submit"
-                    className="flex-1 h-14 rounded-2xl font-black text-xs tracking-widest bg-foreground hover:bg-foreground/90 text-background shadow-2xl shadow-foreground/20 transition-all hover:-translate-y-1 active:translate-y-0"
-                  >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'SAVE'}
-                  </Button>
+                {/* Action Buttons */}
+                <div className="p-6 border-t border-border bg-background shrink-0">
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={onClose}
+                      className="flex-1 h-11 rounded-lg text-sm font-medium border border-border bg-background text-foreground hover:bg-accent transition-colors"
+                    >
+                      CANCEL
+                    </Button>
+                    <Button
+                      disabled={loading}
+                      type="submit"
+                      className="flex-1 h-11 rounded-lg text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors"
+                    >
+                      {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'SAVE'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

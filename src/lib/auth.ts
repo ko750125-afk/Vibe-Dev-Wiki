@@ -23,31 +23,10 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     return null
   }
 
-  const { data: adminRow, error: adminError } = await supabase
-    .from('vibe_admin_users')
-    .select('email')
-    .eq('email', user.email)
-    .maybeSingle()
-
-  if (adminError) {
-    const tableMissing =
-      adminError.message.includes("Could not find the table 'public.vibe_admin_users'") ||
-      adminError.code === 'PGRST205'
-
-    if (tableMissing) {
-      return {
-        supabase,
-        user,
-        isAdmin: false,
-      }
-    }
-
-    throw new Error(`Failed to verify admin: ${adminError.message}`)
-  }
-
   return {
     supabase,
     user,
-    isAdmin: !!adminRow,
+    // 단일 사용자 운영: 로그인 사용자면 편집 권한 허용
+    isAdmin: true,
   }
 }
