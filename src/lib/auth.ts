@@ -18,6 +18,9 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     data: { user },
     error: authError,
   } = await supabase.auth.getUser()
+  // #region agent log
+  fetch('http://127.0.0.1:7278/ingest/e57c9c70-c756-4613-96ca-1ef08deda9d5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c6b1d8'},body:JSON.stringify({sessionId:'c6b1d8',runId:'mobile-login-block-v1',hypothesisId:'H4',location:'src/lib/auth.ts:21',message:'Auth context getUser result',data:{hasUser:Boolean(user),hasEmail:Boolean(user?.email),error:authError?.message??null},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
 
   if (authError || !user || !user.email) {
     return null

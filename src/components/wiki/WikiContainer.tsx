@@ -14,6 +14,11 @@ interface WikiContainerProps {
   isAdmin: boolean
 }
 
+const SEARCH_RESULT_LABEL = '전체 검색 결과'
+
+const buildSearchTarget = (note: WikiNote) =>
+  `${note.title} ${note.content} ${note.stage_name}`.toLowerCase()
+
 export default function WikiContainer({ initialNotes, initialSectors, currentSectorId, isAdmin }: WikiContainerProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -37,20 +42,11 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
 
   // 검색어가 있으면 전체 검색, 없으면 현재 섹터 기준으로 표시
   const filteredNotes = useMemo(() => {
-    return initialNotes.filter(note => {
-      const searchLower = searchQuery.toLowerCase()
-      const matchesSearch = searchQuery === '' || 
-        note.title.toLowerCase().includes(searchLower) ||
-        note.content.toLowerCase().includes(searchLower) ||
-        note.stage_name.toLowerCase().includes(searchLower)
-
-      // 검색어가 입력된 경우: 위키 전체 검색
-      if (searchQuery !== '') return matchesSearch
-
-      // 검색어가 없는 경우: 현재 섹터 필터 적용
-      const matchesSector = note.sector_id === currentSectorId
-      return matchesSector
-    })
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+    if (normalizedQuery) {
+      return initialNotes.filter((note) => buildSearchTarget(note).includes(normalizedQuery))
+    }
+    return initialNotes.filter((note) => note.sector_id === currentSectorId)
   }, [initialNotes, searchQuery, currentSectorId])
 
   return (
@@ -59,7 +55,7 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
         <div className="flex items-center gap-4">
           <div>
             <h2 className="text-xl font-black text-foreground tracking-tight leading-none">
-              {searchQuery ? '전체 검색 결과' : currentSector.name}
+              {searchQuery ? SEARCH_RESULT_LABEL : currentSector.name}
             </h2>
           </div>
         </div>

@@ -36,6 +36,8 @@ interface NoteModalProps {
   initialData?: WikiNote
 }
 
+const ALLOWED_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'jfif'] as const
+
 const TOOLBAR_CONFIG = {
   headings: [
     { icon: Heading1, prefix: '# ', suffix: '', title: 'Heading 1' },
@@ -70,24 +72,35 @@ const ToolbarButton = memo(({ tool, onAction }: { tool: any, onAction: (prefix: 
 })
 ToolbarButton.displayName = 'ToolbarButton'
 
-const MarkdownPreview = memo(({ content }: { content: string }) => (
-  <div className={cn(
-    "prose max-w-none dark:prose-invert prose-headings:tracking-tight prose-pre:bg-slate-900 prose-pre:border prose-pre:border-white/5 whitespace-normal",
-    "prose-p:my-2 prose-p:leading-relaxed prose-li:my-1 prose-ul:my-4 prose-ol:my-4",
-    "prose-table:border-collapse prose-table:border prose-table:border-border prose-th:border prose-th:border-border prose-th:bg-muted/50 prose-th:px-4 prose-th:py-3 prose-td:border prose-td:border-border prose-td:px-4 prose-td:py-3",
-    "prose-li:list-none [&_ul_input[type='checkbox']]:mr-3 [&_ul_input[type='checkbox']]:mt-1.5 prose-stone prose-headings:text-foreground text-foreground/90"
-  )}>
-    {content ? (
-      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
-        {content}
-      </ReactMarkdown>
-    ) : (
-      <div className="flex flex-col items-center justify-center h-full opacity-10 py-32">
-        <p className="font-bold italic text-xl text-center text-foreground">미리보기 영역입니다.</p>
-      </div>
-    )}
-  </div>
-))
+const normalizeMarkdown = (raw: string) => {
+  return raw
+    .split('\n')
+    .map((line) => line.replace(/^(\#{1,3})(\S)/, (_m, hashes: string, rest: string) => `${hashes} ${rest}`))
+    .join('\n')
+}
+
+const MarkdownPreview = memo(({ content }: { content: string }) => {
+  const normalized = normalizeMarkdown(content)
+  return (
+    <div className={cn(
+      "prose max-w-none dark:prose-invert prose-headings:tracking-tight prose-pre:bg-slate-900 prose-pre:border prose-pre:border-white/5 whitespace-normal",
+      "prose-p:my-2 prose-p:leading-relaxed prose-li:my-1 prose-ul:my-4 prose-ol:my-4",
+      "prose-table:border-collapse prose-table:border prose-table:border-border prose-th:border prose-th:border-border prose-th:bg-muted/50 prose-th:px-4 prose-th:py-3 prose-td:border prose-td:border-border prose-td:px-4 prose-td:py-3",
+      "prose-stone prose-headings:text-foreground text-foreground/90",
+      "prose-a:text-primary prose-a:underline"
+    )}>
+      {normalized ? (
+        <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+          {normalized}
+        </ReactMarkdown>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-full opacity-10 py-32">
+          <p className="font-bold italic text-xl text-center text-foreground">미리보기 영역입니다.</p>
+        </div>
+      )}
+    </div>
+  )
+})
 MarkdownPreview.displayName = 'MarkdownPreview'
 
 // --- Main Component ---
@@ -104,11 +117,14 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
 
   const editorRef = useRef<HTMLTextAreaElement>(null)
   const previewRef = useRef<HTMLDivElement>(null)
+  const updateFormData = (patch: Partial<typeof formData>) => {
+    setFormData((prev) => ({ ...prev, ...patch }))
+  }
 
   // Sync state with initialData
   useEffect(() => {
     if (isOpen) {
-      setFormData({
+      updateFormData({
         title: initialData?.title || '',
         content: (initialData?.content || '').replace(/\\n/g, '\n'),
         block_type: initialData?.block_type || 'tip',
@@ -117,12 +133,28 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
     }
   }, [initialData, isOpen])
 
-  const handleScroll = () => {
+  const syncPreviewScroll = () => {
     if (!editorRef.current || !previewRef.current) return
     const { scrollTop, scrollHeight, clientHeight } = editorRef.current
-    const scrollPercentage = scrollTop / (scrollHeight - clientHeight)
+    const scrollRange = scrollHeight - clientHeight
+    if (scrollRange <= 0) {
+      previewRef.current.scrollTop = 0
+      return
+    }
+    const scrollPercentage = scrollTop / scrollRange
     previewRef.current.scrollTop = scrollPercentage * (previewRef.current.scrollHeight - previewRef.current.clientHeight)
   }
+
+  const handleScroll = () => {
+    syncPreviewScroll()
+  }
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      syncPreviewScroll()
+    })
+    return () => cancelAnimationFrame(id)
+  }, [formData.content])
 
   const handleEditorAction = (prefix: string, suffix: string) => {
     const textarea = editorRef.current
@@ -134,7 +166,7 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
     const after = text.substring(end)
     
     const newText = before + prefix + selection + suffix + after
-    setFormData(prev => ({ ...prev, content: newText }))
+    updateFormData({ content: newText })
     
     setTimeout(() => {
       textarea.focus({ preventScroll: true })
@@ -144,7 +176,13 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
   }
 
   const handleImageUpload = async (file: File) => {
-    if (!file.type.startsWith('image/')) return alert('이미지 파일만 업로드 가능합니다.')
+    const fileExt = file.name.split('.').pop()?.toLowerCase()
+    const isImageType = file.type.startsWith('image/')
+    const isCommonImageExt = fileExt && ALLOWED_IMAGE_EXTENSIONS.includes(fileExt as (typeof ALLOWED_IMAGE_EXTENSIONS)[number])
+    if (!isImageType && !isCommonImageExt) {
+      alert('이미지 파일(png, jpg, jpeg, jfif)만 업로드 가능합니다.')
+      return
+    }
 
     setIsUploading(true)
     try {
@@ -196,7 +234,7 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
                 required
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                onChange={(e) => updateFormData({ title: e.target.value })}
                 placeholder="제목"
                 className="w-full bg-transparent border-none outline-none text-2xl font-semibold text-foreground placeholder:text-muted-foreground"
               />
@@ -204,11 +242,10 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
 
             <div className="px-8 py-4 border-b border-border bg-background shrink-0">
               <textarea
-                required
                 rows={2}
                 maxLength={160}
                 value={formData.stage_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, stage_name: e.target.value }))}
+                onChange={(e) => updateFormData({ stage_name: e.target.value })}
                 placeholder="설명 (최대 2줄)"
                 className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm leading-relaxed text-foreground outline-none focus:ring-2 focus:ring-ring/20 placeholder:text-muted-foreground"
               />
@@ -220,7 +257,7 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
                   ref={editorRef}
                   required
                   value={formData.content}
-                  onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                  onChange={(e) => updateFormData({ content: e.target.value })}
                   onScroll={handleScroll}
                   onDrop={async (e) => {
                     e.preventDefault()

@@ -26,7 +26,25 @@ interface ViewNoteModalProps {
   }
 }
 
+const markdownContainerClass = cn(
+  "prose max-w-none prose-headings:tracking-tight prose-pre:bg-slate-900 prose-pre:border prose-pre:border-white/5 whitespace-normal",
+  "prose-p:my-1 prose-p:leading-relaxed prose-li:my-0 prose-ul:my-2 prose-ol:my-2",
+  "prose-table:border-collapse prose-table:border prose-table:border-border prose-th:border prose-th:border-border prose-th:bg-secondary prose-th:px-4 prose-th:py-2 prose-td:border prose-td:border-border prose-td:px-4 prose-td:py-2",
+  "prose-stone prose-headings:text-foreground text-foreground/90 dark:prose-invert",
+  "prose-a:text-primary prose-a:underline"
+)
+
 export default function ViewNoteModal({ isOpen, onClose, onEdit, onDelete, note }: ViewNoteModalProps) {
+  const handleEditClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    onEdit?.()
+  }
+
+  const handleDeleteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    onDelete?.()
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
@@ -41,13 +59,7 @@ export default function ViewNoteModal({ isOpen, onClose, onEdit, onDelete, note 
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-background">
-          <div className={cn(
-            "prose max-w-none prose-headings:tracking-tight prose-pre:bg-slate-900 prose-pre:border prose-pre:border-white/5 whitespace-normal",
-            "prose-p:my-1 prose-p:leading-relaxed prose-li:my-0 prose-ul:my-2 prose-ol:my-2",
-            "prose-table:border-collapse prose-table:border prose-table:border-border prose-th:border prose-th:border-border prose-th:bg-secondary prose-th:px-4 prose-th:py-2 prose-td:border prose-td:border-border prose-td:px-4 prose-td:py-2",
-            "prose-li:list-none [&_ul_input[type='checkbox']]:mr-2 [&_ul_input[type='checkbox']]:mt-1",
-            "prose-stone prose-headings:text-foreground text-foreground/90 dark:prose-invert"
-          )}>
+          <div className={markdownContainerClass}>
             <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
               {note.content.replace(/\\n/g, '\n')}
             </ReactMarkdown>
@@ -57,10 +69,7 @@ export default function ViewNoteModal({ isOpen, onClose, onEdit, onDelete, note 
         <div className="p-4 px-6 border-t border-border flex items-center justify-end gap-2">
           {onEdit && (
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onEdit()
-              }}
+              onClick={handleEditClick}
               className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
             >
               <Edit3 className="w-4 h-4" />
@@ -69,10 +78,7 @@ export default function ViewNoteModal({ isOpen, onClose, onEdit, onDelete, note 
           )}
           {onDelete && (
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onDelete()
-              }}
+              onClick={handleDeleteClick}
               className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
             >
               <Trash2 className="w-4 h-4" />

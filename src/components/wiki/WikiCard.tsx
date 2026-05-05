@@ -5,6 +5,16 @@ import NoteModal from './NoteModal'
 import ViewNoteModal from './ViewNoteModal'
 import { BlockType } from '@/lib/types'
 
+const DELETE_NOTE_CONFIRM_MESSAGE =
+  '⚠️ [경고] 지식 삭제\n\n작성하신 소중한 노하우가 영구적으로 삭제됩니다.\n정말로 삭제하시겠습니까?'
+
+const sanitizeSummary = (raw: string) =>
+  raw
+    .replace(/[#>*`[\]\-]/g, ' ')
+    .replace(/\((.*?)\)/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
 interface WikiCardProps {
   id: string
   title: string
@@ -12,9 +22,7 @@ interface WikiCardProps {
   block_type: BlockType
   stage_name: string
   created_at?: string
-  isAdmin?: boolean
   sectorId: number
-  sectorName: string
   searchTerm?: string
 }
 
@@ -25,15 +33,15 @@ export default function WikiCard({
   block_type, 
   stage_name, 
   created_at, 
-  isAdmin, 
   sectorId,
-  sectorName,
   searchTerm 
 }: WikiCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isViewOpen, setIsViewOpen] = useState(false)
-  const hiddenText = ''
+  const plainSummary = sanitizeSummary(content)
+  const descriptionText = (stage_name || plainSummary || '설명이 없습니다.').trim()
+
 
   const HighlightText = ({ text, query }: { text: string; query?: string }) => {
     if (!query?.trim()) return <>{text}</>
@@ -56,9 +64,7 @@ export default function WikiCard({
 
   const handleDelete = async (e?: React.MouseEvent) => {
     e?.stopPropagation()
-    const isConfirmed = window.confirm(
-      '⚠️ [경고] 지식 삭제\n\n작성하신 소중한 노하우가 영구적으로 삭제됩니다.\n정말로 삭제하시겠습니까?'
-    )
+    const isConfirmed = window.confirm(DELETE_NOTE_CONFIRM_MESSAGE)
     if (!isConfirmed) return
     setIsDeleting(true)
     try {
@@ -68,11 +74,6 @@ export default function WikiCard({
       console.error(err)
       setIsDeleting(false)
     }
-  }
-
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setIsEditOpen(true)
   }
 
   return (
@@ -86,14 +87,14 @@ export default function WikiCard({
       >
         <div className="p-5">
           <h3 className="line-clamp-2 text-base font-semibold leading-snug text-foreground">
-            <HighlightText text={hiddenText} query={searchTerm} />
+            <HighlightText text={title} query={searchTerm} />
           </h3>
         </div>
 
         <div className="mx-5 border-t border-border" />
         <div className="flex-1 p-5 pt-4">
           <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-            <HighlightText text={hiddenText} query={searchTerm} />
+            <HighlightText text={descriptionText} query={searchTerm} />
           </p>
         </div>
       </div>
@@ -107,7 +108,7 @@ export default function WikiCard({
           setIsEditOpen(true)
         }}
         onDelete={handleDelete}
-        note={{ title: hiddenText, content: hiddenText, block_type, stage_name: hiddenText, created_at }}
+        note={{ title, content, block_type, stage_name, created_at }}
       />
 
       {isEditOpen && (

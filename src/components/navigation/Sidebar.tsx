@@ -24,6 +24,24 @@ interface SidebarProps {
   initialSectors: WikiSector[]
 }
 
+const DELETE_SECTOR_CONFIRM_MESSAGE =
+  '⚠️ [위험] 기술 스택 삭제\n\n이 기술 스택을 삭제하면 해당 분류에 저장된 모든 지식 정보들이 함께 삭제되거나 연결을 잃게 됩니다.\n정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
+
+const startsWithEnglish = (value: string) => /^[A-Za-z]/.test(value)
+
+const sortSectorNames = (a: WikiSector, b: WikiSector) => {
+  const aName = a.name.trim()
+  const bName = b.name.trim()
+  const aIsEnglish = startsWithEnglish(aName)
+  const bIsEnglish = startsWithEnglish(bName)
+
+  if (aIsEnglish !== bIsEnglish) {
+    return aIsEnglish ? -1 : 1
+  }
+
+  return aName.localeCompare(bName, aIsEnglish ? 'en' : 'ko', { sensitivity: 'base' })
+}
+
 export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -48,7 +66,9 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
   }, [currentSectorId, initialSectors])
 
   const filteredSectors = useMemo(() => 
-    initialSectors.filter(s => s.category_id === activeCategoryId)
+    initialSectors
+      .filter(s => s.category_id === activeCategoryId)
+      .sort(sortSectorNames)
   , [activeCategoryId, initialSectors])
 
   const handleSectorClick = (id: number) => {
@@ -82,9 +102,7 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
   }
 
   const handleDeleteSector = async (id: number) => {
-    const isConfirmed = window.confirm(
-      '⚠️ [위험] 기술 스택 삭제\n\n이 기술 스택을 삭제하면 해당 분류에 저장된 모든 지식 정보들이 함께 삭제되거나 연결을 잃게 됩니다.\n정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
-    )
+    const isConfirmed = window.confirm(DELETE_SECTOR_CONFIRM_MESSAGE)
     if (!isConfirmed) return
     try {
       await deleteSector(id)
