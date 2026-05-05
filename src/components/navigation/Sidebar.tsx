@@ -87,11 +87,6 @@ export default function Sidebar({ userEmail, isAdmin }: SidebarProps) {
                       {sector.description}
                     </p>
                   </div>
-
-                  {/* Active Indicator Bar (Inner) */}
-                  {isActive && (
-                    <div className="absolute -left-8 top-1/2 -translate-y-1/2 w-2 h-8 bg-primary rounded-r-2xl animate-in slide-in-from-left duration-500" />
-                  )}
                 </button>
               )
             })}
