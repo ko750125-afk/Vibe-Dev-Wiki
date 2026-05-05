@@ -14,11 +14,6 @@ export default function LoginPage() {
         </div>
         
         <div className="p-8">
-          <div className="text-center mb-8">
-            <h2 className="text-xl font-semibold text-primary">관리자 전용 로그인</h2>
-            <p className="text-muted-foreground text-sm mt-2">지식의 가치를 기록하고 체계화합니다.</p>
-          </div>
-
           <form action={signInWithGoogle}>
             <button
               type="submit"
@@ -34,14 +29,14 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-8 flex items-center justify-center gap-2 text-xs text-muted-foreground/60">
+          <div className="mt-8 flex items-center justify-center gap-2 text-xs text-foreground/80">
             <ShieldCheck className="w-3 h-3" />
             <span>Authorized Personnel Only</span>
           </div>
         </div>
       </div>
       
-      <div className="mt-8 text-xs text-muted-foreground/40 font-mono">
+      <div className="mt-8 text-xs text-foreground/70 font-mono">
         © 2026 Vibe Dev-Wiki. Academic Deep Blue & Cream Edition.
       </div>
     </div>

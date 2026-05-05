@@ -22,13 +22,13 @@ export default function EmptyState({ sectorName, SectorIcon, isAdmin, onReset }:
       </div>
       
       <h3 className="text-2xl font-black text-foreground tracking-tight mb-4">
-        {isSearch ? '일치하는 지식을 찾지 못했습니다' : `${sectorName}의 지식을 채워주세요`}
+        {isSearch ? '일치하는 지식을 찾지 못했습니다' : `About ${sectorName}`}
       </h3>
       
       <p className="text-muted-foreground font-medium max-w-[320px] leading-relaxed mb-8">
         {isSearch 
           ? '다른 검색어를 입력하거나, 필터를 확인해보세요.' 
-          : '아직 등록된 노하우가 없습니다. 부장님의 소중한 경험을 첫 번째로 공유해보세요!'}
+          : '관련 노하우를 기록하세요.'}
       </p>
 
       {isSearch && onReset && (
@@ -41,14 +41,6 @@ export default function EmptyState({ sectorName, SectorIcon, isAdmin, onReset }:
         </Button>
       )}
 
-      {isAdmin && !isSearch && (
-        <div className="mt-8 flex items-center gap-2 px-5 py-2 bg-muted rounded-full border border-border">
-          <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
-            Admin Authoring Enabled
-          </span>
-        </div>
-      )}
     </div>
   )
 }
