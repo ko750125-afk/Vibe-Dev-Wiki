@@ -1,5 +1,13 @@
 export type BlockType = 'security' | 'config' | 'command' | 'tip'
 
+export interface WikiSector {
+  id: number
+  category_id: number // 1: Client, 2: Server, 3: DB, 4: Others
+  name: string
+  icon?: string
+  created_at?: string
+}
+
 export interface WikiNote {
   id: string
   sector_id: number
@@ -7,7 +15,6 @@ export interface WikiNote {
   title: string
   content: string
   block_type: BlockType
-  tags: string[]
   user_id?: string
   created_at?: string
 }
@@ -17,6 +24,5 @@ export interface NotePayload {
   title: string
   content: string
   block_type: BlockType
-  tags: string[]
   sector_id?: number
 }

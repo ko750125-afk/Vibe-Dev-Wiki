@@ -1,52 +1,47 @@
-import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Sidebar from '@/components/navigation/Sidebar'
-import { SECTORS } from '@/lib/constants'
 import { Suspense } from 'react'
-import { getNotes } from './actions'
+import { getNotes, getSectors } from './actions'
 import WikiContainer from '@/components/wiki/WikiContainer'
+import { getAuthContext } from '@/lib/auth'
 
 export default async function HomePage({
   searchParams,
 }: {
   searchParams: Promise<{ sector?: string }>
 }) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
+  const auth = await getAuthContext()
+  if (!auth) {
     return redirect('/login')
   }
 
-  // vibe_admin_users 테이블에서 관리자 여부 확인
-  const { data: adminUser } = await supabase
-    .from('vibe_admin_users')
-    .select('email')
-    .eq('email', user.email)
-    .single()
+  const { user, isAdmin } = auth
+
+  // 1. DB에서 모든 섹터(기술 스택) 가져오기
+  const sectors = await getSectors()
   
-  const isAdmin = !!adminUser
-
   const { sector } = await searchParams
-  const currentSectorId = Number(sector) || 1
-  const currentSector = SECTORS.find(s => s.id === currentSectorId) || SECTORS[0]
+  // 2. 현재 선택된 섹터 ID 결정 (없으면 첫 번째 섹터)
+  const currentSectorId = Number(sector) || (sectors.length > 0 ? sectors[0].id : 0)
 
-  // Fetch real data from server
-  const notes = await getNotes(currentSectorId)
+  // 3. 모든 노트 가져오기 (전체 검색용)
+  const notes = await getNotes(0) 
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar */}
-      <Suspense fallback={<div className="w-72 bg-white/30 border-r" />}>
-        <Sidebar userEmail={user.email} isAdmin={isAdmin} />
+      {/* Sidebar: DB에서 가져온 섹터 목록 전달 */}
+      <Suspense fallback={<div className="w-[340px] bg-background border-r border-border" />}>
+        <Sidebar 
+          userEmail={user.email} 
+          isAdmin={isAdmin} 
+          initialSectors={sectors}
+        />
       </Suspense>
 
-      {/* Main Content Container (Client Component for Search) */}
+      {/* Main Content Container: 섹터 목록과 노드 목록 전달 */}
       <WikiContainer 
         initialNotes={notes} 
+        initialSectors={sectors}
         currentSectorId={currentSectorId} 
         isAdmin={isAdmin} 
       />
