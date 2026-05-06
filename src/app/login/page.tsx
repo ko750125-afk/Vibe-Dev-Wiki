@@ -4,20 +4,20 @@ import { BookOpen, ShieldCheck } from 'lucide-react'
 export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md bg-white border-2 border-primary/20 rounded-2xl shadow-xl overflow-hidden transition-all hover:shadow-2xl">
+      <div className="w-full max-w-md bg-secondary border border-border rounded-2xl shadow-xl overflow-hidden transition-all hover:shadow-2xl">
         <div className="bg-primary p-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-full mb-4">
-            <BookOpen className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-foreground/10 rounded-full mb-4 overflow-hidden border border-primary-foreground/20">
+            <img src="/logo.png" alt="Vibe Dev-Wiki Logo" className="w-full h-full object-cover" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Vibe Dev-Wiki</h1>
-          <p className="text-white/70 mt-2 text-sm font-medium uppercase tracking-widest">Knowledge Management</p>
+          <h1 className="text-2xl font-bold text-primary-foreground tracking-tight">Vibe Dev-Wiki</h1>
+          <p className="text-primary-foreground/70 mt-2 text-sm font-medium uppercase tracking-widest">Knowledge Management</p>
         </div>
         
         <div className="p-8">
           <form action={signInWithGoogle}>
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-3 bg-primary text-white py-4 px-6 rounded-xl font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md group"
+              className="w-full flex items-center justify-center gap-3 bg-primary text-primary-foreground py-4 px-6 rounded-xl font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md group"
             >
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

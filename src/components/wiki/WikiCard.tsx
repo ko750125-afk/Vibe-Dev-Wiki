@@ -26,6 +26,25 @@ interface WikiCardProps {
   searchTerm?: string
 }
 
+const HighlightText = ({ text, query }: { text: string; query?: string }) => {
+  if (!query?.trim()) return <>{text}</>
+  
+  const parts = text.split(new RegExp(`(${query})`, 'gi'))
+  return (
+    <>
+      {parts.map((part, i) => (
+        part.toLowerCase() === query.toLowerCase() ? (
+          <mark key={i} className="bg-yellow-200 dark:bg-yellow-900/50 dark:text-yellow-200 text-primary px-0.5 rounded-sm animate-pulse">
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      ))}
+    </>
+  )
+}
+
 export default function WikiCard({ 
   id, 
   title, 
@@ -41,26 +60,6 @@ export default function WikiCard({
   const [isViewOpen, setIsViewOpen] = useState(false)
   const plainSummary = sanitizeSummary(content)
   const descriptionText = (stage_name || plainSummary || '설명이 없습니다.').trim()
-
-
-  const HighlightText = ({ text, query }: { text: string; query?: string }) => {
-    if (!query?.trim()) return <>{text}</>
-    
-    const parts = text.split(new RegExp(`(${query})`, 'gi'))
-    return (
-      <>
-        {parts.map((part, i) => (
-          part.toLowerCase() === query.toLowerCase() ? (
-            <mark key={i} className="bg-yellow-200 dark:bg-yellow-900/50 dark:text-yellow-200 text-primary px-0.5 rounded-sm animate-pulse">
-              {part}
-            </mark>
-          ) : (
-            <span key={i}>{part}</span>
-          )
-        ))}
-      </>
-    )
-  }
 
   const handleDelete = async (e?: React.MouseEvent) => {
     e?.stopPropagation()

@@ -54,7 +54,14 @@ const TOOLBAR_CONFIG = {
 
 // --- Sub-components ---
 
-const ToolbarButton = memo(({ tool, onAction }: { tool: any, onAction: (prefix: string, suffix: string) => void }) => {
+interface ToolConfig {
+  icon: React.ElementType
+  prefix: string
+  suffix: string
+  title: string
+}
+
+const ToolbarButton = memo(({ tool, onAction }: { tool: ToolConfig, onAction: (prefix: string, suffix: string) => void }) => {
   const Icon = tool.icon
   return (
     <button
@@ -124,6 +131,7 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
   // Sync state with initialData
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       updateFormData({
         title: initialData?.title || '',
         content: (initialData?.content || '').replace(/\\n/g, '\n'),
@@ -131,6 +139,7 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
         stage_name: initialData?.stage_name || '',
       })
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData, isOpen])
 
   const syncPreviewScroll = () => {

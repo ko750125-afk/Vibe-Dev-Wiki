@@ -99,7 +99,6 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
         {filteredNotes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {filteredNotes.map((note) => {
-              const noteSector = initialSectors.find(s => s.id === note.sector_id)
               return (
                 <WikiCard
                   key={note.id}
@@ -108,9 +107,7 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
                   content={note.content}
                   block_type={note.block_type}
                   stage_name={note.stage_name}
-                  isAdmin={isAdmin}
                   sectorId={note.sector_id}
-                  sectorName={noteSector?.name || 'Unknown'}
                   created_at={note.created_at}
                   searchTerm={searchQuery}
                 />
@@ -121,7 +118,6 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
           <div className="py-12">
             <EmptyState 
               sectorName={searchQuery ? `'${searchQuery}' 검색 결과` : currentSector.name} 
-              isAdmin={isAdmin} 
               onReset={() => {
                 setSearchQuery('')
               }}

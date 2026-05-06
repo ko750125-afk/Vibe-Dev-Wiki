@@ -4,11 +4,10 @@ import { Button } from '@/components/ui/button'
 interface EmptyStateProps {
   sectorName: string
   SectorIcon?: LucideIcon
-  isAdmin: boolean
   onReset?: () => void
 }
 
-export default function EmptyState({ sectorName, SectorIcon, isAdmin, onReset }: EmptyStateProps) {
+export default function EmptyState({ sectorName, SectorIcon, onReset }: EmptyStateProps) {
   const isSearch = sectorName.includes('검색 결과')
   const Icon = SectorIcon || (isSearch ? SearchX : Sparkles)
 

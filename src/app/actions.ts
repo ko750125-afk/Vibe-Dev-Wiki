@@ -180,3 +180,15 @@ export async function uploadImage(formData: FormData): Promise<string> {
 
   return data.publicUrl
 }
+
+export async function signOutAction() {
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.error('[signOutAction] Error:', error.message)
+    throw new Error('Failed to sign out')
+  }
+  
+  const { redirect } = await import('next/navigation')
+  redirect('/login')
+}

@@ -49,6 +49,7 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
+          themes={['light', 'starbucks', 'lego', 'netflix']}
         >
           {children}
         </ThemeProvider>

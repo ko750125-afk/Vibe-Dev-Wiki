@@ -15,7 +15,7 @@ import {
 import { cn } from '@/lib/utils'
 import { SIDEBAR_CATEGORIES } from '@/lib/constants'
 import { WikiSector } from '@/lib/types'
-import { addSector, updateSector, deleteSector } from '@/app/actions'
+import { addSector, updateSector, deleteSector, signOutAction } from '@/app/actions'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 interface SidebarProps {
@@ -86,7 +86,7 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
       await addSector(activeCategoryId, newValue.trim())
       setNewValue('')
       setIsAdding(false)
-    } catch (err) {
+    } catch {
       alert('섹터 추가 실패')
     }
   }
@@ -96,7 +96,7 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
     try {
       await updateSector(id, editValue.trim())
       setEditingSectorId(null)
-    } catch (err) {
+    } catch {
       alert('섹터 수정 실패')
     }
   }
@@ -106,7 +106,7 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
     if (!isConfirmed) return
     try {
       await deleteSector(id)
-    } catch (err) {
+    } catch {
       alert('섹터 삭제 실패')
     }
   }
@@ -115,7 +115,9 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
     <aside className="h-screen flex bg-background text-foreground sticky top-0 z-50 border-r border-border">
       {/* 1. Icon Rail (좌측 아이콘 레일) */}
       <div className="w-[64px] border-r border-border flex flex-col items-center py-4 gap-4 bg-secondary">
-        <div className="h-10 mb-4" /> {/* Logo removed */}
+        <div className="h-10 mb-4 flex items-center justify-center">
+          <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg shadow-sm" />
+        </div>
 
         <div className="flex-1 w-full flex flex-col items-center gap-2">
           {SIDEBAR_CATEGORIES.map((cat) => {
@@ -265,7 +267,7 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
               </div>
             </div>
 
-            <form action="/auth/signout" method="post">
+            <form action={signOutAction}>
               <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-bold text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all border border-transparent hover:border-border">
                 <LogOut className="w-4 h-4" />
                 <span>SIGN OUT</span>
