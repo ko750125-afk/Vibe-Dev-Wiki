@@ -34,6 +34,13 @@ const markdownContainerClass = cn(
   "prose-a:text-primary prose-a:underline"
 )
 
+const normalizeMarkdown = (raw: string) => {
+  return raw
+    .split('\n')
+    .map((line) => line.replace(/^(\#{1,3})(\S)/, (_m, hashes: string, rest: string) => `${hashes} ${rest}`))
+    .join('\n')
+}
+
 export default function ViewNoteModal({ isOpen, onClose, onEdit, onDelete, note }: ViewNoteModalProps) {
   const handleEditClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
@@ -44,6 +51,8 @@ export default function ViewNoteModal({ isOpen, onClose, onEdit, onDelete, note 
     e.stopPropagation()
     onDelete?.()
   }
+
+  const normalizedContent = normalizeMarkdown(note.content.replace(/\\n/g, '\n'))
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -61,7 +70,7 @@ export default function ViewNoteModal({ isOpen, onClose, onEdit, onDelete, note 
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-background">
           <div className={markdownContainerClass}>
             <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
-              {note.content.replace(/\\n/g, '\n')}
+              {normalizedContent}
             </ReactMarkdown>
           </div>
         </div>
