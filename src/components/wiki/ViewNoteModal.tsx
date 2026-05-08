@@ -49,7 +49,7 @@ export default function ViewNoteModal({ isOpen, onClose, onEdit, onDelete, note 
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
         hideClose
-        className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 shadow-xl rounded-2xl bg-background text-foreground"
+        className="max-w-4xl w-[95vw] h-[85vh] overflow-hidden flex flex-col p-0 gap-0 shadow-2xl rounded-[24px] bg-background text-foreground border-border"
       >
         <div className="sr-only">
           <DialogDescription>
@@ -57,46 +57,46 @@ export default function ViewNoteModal({ isOpen, onClose, onEdit, onDelete, note 
           </DialogDescription>
         </div>
         
-        <div className="p-6 border-b border-border">
+        <div className="px-8 py-5 border-b border-border bg-background shrink-0">
           <DialogTitle className="text-2xl font-bold leading-tight text-foreground">
             {note.title}
           </DialogTitle>
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-background">
+        <div className="flex-1 overflow-y-auto px-8 py-6 p-8 custom-scrollbar bg-background">
           <div 
             className={proseClass}
             dangerouslySetInnerHTML={{ __html: note.content }}
           />
         </div>
 
-        <div className="p-4 px-6 border-t border-border flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="p-6 px-8 border-t border-border flex items-center justify-between bg-background shrink-0">
+          <div className="flex items-center gap-3">
             {onEdit && (
               <button
                 onClick={handleEditClick}
-                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                className="w-32 h-11 inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
               >
                 <Edit3 className="w-4 h-4" />
-                수정
+                EDIT
               </button>
             )}
             {onDelete && (
               <button
                 onClick={handleDeleteClick}
-                className="inline-flex items-center gap-2 rounded-lg border border-red-100 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                className="w-32 h-11 inline-flex items-center justify-center gap-2 rounded-lg border border-red-100 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
               >
                 <Trash2 className="w-4 h-4" />
-                삭제
+                DELETE
               </button>
             )}
           </div>
           <button
             onClick={onClose}
-            className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary/80"
+            className="w-32 h-11 inline-flex items-center justify-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary/80"
           >
-            닫기
+            CLOSE
           </button>
         </div>
       </DialogContent>
