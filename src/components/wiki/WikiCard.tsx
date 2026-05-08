@@ -117,8 +117,7 @@ function WikiCard({
           setIsViewOpen(false)
           setIsEditOpen(true)
         }}
-        onDelete={(e) => {
-          e?.stopPropagation()
+        onDelete={() => {
           setIsViewOpen(false)
           setIsDeleteDialogOpen(true)
         }}
