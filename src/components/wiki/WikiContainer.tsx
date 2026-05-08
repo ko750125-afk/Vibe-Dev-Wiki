@@ -147,7 +147,7 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
 
       <div className="p-8 max-w-7xl mx-auto">
         {filteredNotes.length > 0 ? (
-          <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {filteredNotes.map((note) => {
               return (
                 <WikiCard

@@ -77,21 +77,31 @@ function WikiCard({
       <div 
         onClick={() => setIsViewOpen(true)}
         className={cn(
-          "group relative flex flex-col sm:flex-row sm:items-stretch cursor-pointer overflow-hidden rounded-xl border border-border bg-background transition-all hover:bg-accent/30 hover:shadow-sm",
+          "group relative flex items-center justify-between cursor-pointer px-5 py-3.5 rounded-xl border border-border bg-background transition-all hover:bg-accent/40 hover:shadow-md hover:ring-1 hover:ring-border animate-in fade-in slide-in-from-bottom-2 duration-300",
           isDeleting && "opacity-50 grayscale pointer-events-none"
         )}
       >
-        <div className="w-full sm:w-1/3 sm:min-w-[200px] sm:max-w-[300px] p-4 sm:p-5 border-b sm:border-b-0 sm:border-r border-border bg-muted/20 flex flex-col justify-center">
-          <h3 className="text-xl font-bold leading-snug text-foreground break-words">
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Decorative Dot / Icon Placeholder */}
+          <div className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors shrink-0" />
+          
+          <h3 className="text-base font-bold text-foreground truncate group-hover:text-primary transition-colors">
             <HighlightText text={title} query={searchTerm} />
           </h3>
         </div>
 
-        <div className="flex-1 p-4 sm:p-5 flex items-start sm:items-center min-w-0">
-          <div 
-            className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-foreground prose-p:leading-relaxed text-muted-foreground break-words w-full"
-            dangerouslySetInnerHTML={{ __html: descriptionHTML }}
-          />
+        <div className="flex items-center gap-4 shrink-0 ml-4">
+          {/* Optional: Meta info like created date or simple arrow */}
+          {created_at && (
+            <span className="hidden sm:block text-[11px] font-medium text-muted-foreground/60 uppercase tracking-wider">
+              {new Date(created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+            </span>
+          )}
+          <div className="w-6 h-6 rounded-lg bg-accent/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <svg className="w-3 h-3 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
         </div>
       </div>
 
