@@ -23,9 +23,14 @@ const stripHtml = (html: string) => {
 export default function WikiContainer({ initialNotes, initialSectors, currentSectorId, isAdmin }: WikiContainerProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const [isMounted, setIsMounted] = useState(false)
   
   // URL 또는 탭 클릭에 의한 로컬 상태 관리
   const [activeSectorId, setActiveSectorId] = useState(currentSectorId)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // 검색 최적화: 검색용 텍스트 미리 계산 (최초 1회 또는 initialNotes 변경 시에만)
   const notesWithSearchTarget = useMemo(() => {
@@ -74,6 +79,25 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
     }
     return notesWithSearchTarget.filter((note) => note.sector_id === activeSectorId)
   }, [notesWithSearchTarget, searchQuery, activeSectorId])
+
+  if (!isMounted) {
+    return (
+      <main className="flex-1 bg-background">
+        <header className="h-20 border-b bg-background/50 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-40 border-border">
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-black text-foreground tracking-tight leading-none">
+              {currentSector.name}
+            </h2>
+          </div>
+        </header>
+        <div className="p-8 max-w-7xl mx-auto flex flex-col gap-3">
+          <div className="h-20 bg-muted/20 animate-pulse rounded-xl" />
+          <div className="h-20 bg-muted/20 animate-pulse rounded-xl" />
+          <div className="h-20 bg-muted/20 animate-pulse rounded-xl" />
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="flex-1 overflow-y-auto pb-20 custom-scrollbar bg-background">
