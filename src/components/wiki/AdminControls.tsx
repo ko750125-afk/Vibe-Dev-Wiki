@@ -10,7 +10,7 @@ interface AdminControlsProps {
   label?: string
 }
 
-export default function AdminControls({ sectorId, className, label = '키워드카드 추가' }: AdminControlsProps) {
+export default function AdminControls({ sectorId, className, label = '키워드추가' }: AdminControlsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
