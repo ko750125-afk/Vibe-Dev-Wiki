@@ -17,6 +17,16 @@ import { SIDEBAR_CATEGORIES } from '@/lib/constants'
 import { WikiSector } from '@/lib/types'
 import { addSector, updateSector, deleteSector, signOutAction } from '@/app/actions'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface SidebarProps {
   userEmail: string | undefined
@@ -24,8 +34,8 @@ interface SidebarProps {
   initialSectors: WikiSector[]
 }
 
-const DELETE_SECTOR_CONFIRM_MESSAGE =
-  '⚠️ [위험] 기술 스택 삭제\n\n이 기술 스택을 삭제하면 해당 분류에 저장된 모든 지식 정보들이 함께 삭제되거나 연결을 잃게 됩니다.\n정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
+const DELETE_SECTOR_TITLE = '⚠️ 기술 스택 삭제'
+const DELETE_SECTOR_DESCRIPTION = '이 기술 스택을 삭제하면 해당 분류에 저장된 모든 지식 정보들이 함께 삭제되거나 연결을 잃게 됩니다. 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
 
 const startsWithEnglish = (value: string) => /^[A-Za-z]/.test(value)
 
@@ -57,6 +67,10 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
   const [isAdding, setIsAdding] = useState(false)
   const [newValue, setNewValue] = useState('')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  
+  // 삭제용 상태
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [sectorToDelete, setSectorToDelete] = useState<number | null>(null)
 
   // URL 파라미터 변경 시 초기화
   useEffect(() => {
@@ -127,11 +141,12 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
     }
   }
 
-  const handleDeleteSector = async (id: number) => {
-    const isConfirmed = window.confirm(DELETE_SECTOR_CONFIRM_MESSAGE)
-    if (!isConfirmed) return
+  const handleDeleteSector = async () => {
+    if (sectorToDelete === null) return
     try {
-      await deleteSector(id)
+      await deleteSector(sectorToDelete)
+      setIsDeleteDialogOpen(false)
+      setSectorToDelete(null)
     } catch {
       alert('섹터 삭제 실패')
     }
@@ -277,7 +292,8 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
                         <button 
                           onClick={(e) => {
                             e.stopPropagation()
-                            handleDeleteSector(sector.id)
+                            setSectorToDelete(sector.id)
+                            setIsDeleteDialogOpen(true)
                           }}
                           className="p-1 hover:bg-red-500/10 rounded text-muted-foreground hover:text-red-500 transition-colors"
                           title="삭제"
@@ -307,7 +323,7 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-bold truncate text-foreground">{userEmail?.split('@')[0]}</p>
-                {isAdmin && <span className="text-[9px] text-muted-foreground font-black uppercase tracking-widest">Admin</span>}
+                {isAdmin && <span className="text-[9px] text-muted-foreground font-black uppercase tracking-widest">User</span>}
               </div>
             </div>
 
@@ -320,6 +336,26 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
           </div>
         </div>
       </div>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{DELETE_SECTOR_TITLE}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {DELETE_SECTOR_DESCRIPTION}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSectorToDelete(null)}>취소</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteSector}
+              className="bg-red-600 hover:bg-red-700 text-white border-none"
+            >
+              삭제하기
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </aside>
     </>
   )

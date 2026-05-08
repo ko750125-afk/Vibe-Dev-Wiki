@@ -160,7 +160,7 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
         hideClose 
-        className="max-w-4xl w-[95vw] bg-background border-border rounded-[24px] p-0 overflow-hidden shadow-2xl flex flex-col h-[85vh]"
+        className="max-w-4xl w-[95vw] bg-background border-border rounded-[24px] p-0 overflow-hidden shadow-2xl flex flex-col h-[85vh] h-[85dvh] max-h-[90dvh] sm:max-h-[85vh]"
       >
         <div className="sr-only">
           <DialogTitle>{initialData ? '지식 수정' : '새 지식 등록'}</DialogTitle>
@@ -169,7 +169,7 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden bg-background">
           <div className="flex-1 flex flex-col overflow-hidden">
-            <DialogHeader className="px-8 py-5 border-b border-border bg-background shrink-0">
+            <DialogHeader className="px-8 py-5 border-b border-border bg-background shrink-0 sticky top-0 z-30">
               <input
                 required
                 type="text"
@@ -184,7 +184,7 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
 
             {/* Toolbar */}
             {editor && (
-              <div className="flex items-center gap-1 p-2.5 px-8 bg-muted/20 border-b border-border shrink-0 overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-1 p-2.5 px-8 bg-background/95 backdrop-blur-sm border-b border-border shrink-0 overflow-x-auto no-scrollbar sticky top-[73px] z-20">
                 {/* Image Upload Group - Moved to front for visibility */}
                 <div className="flex items-center gap-0.5 pr-4 mr-4 border-r border-border shrink-0">
                   <input

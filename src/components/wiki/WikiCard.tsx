@@ -6,9 +6,19 @@ import { deleteNote } from '@/app/actions'
 import NoteModal from './NoteModal'
 import ViewNoteModal from './ViewNoteModal'
 import { BlockType } from '@/lib/types'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
-const DELETE_NOTE_CONFIRM_MESSAGE =
-  '⚠️ [경고] 지식 삭제\n\n작성하신 소중한 노하우가 영구적으로 삭제됩니다.\n정말로 삭제하시겠습니까?'
+const DELETE_CONFIRM_TITLE = '⚠️ 지식 삭제 확인'
+const DELETE_CONFIRM_DESCRIPTION = '작성하신 소중한 노하우가 영구적으로 삭제됩니다. 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
 
 interface WikiCardProps {
   id: string
@@ -53,11 +63,9 @@ function WikiCard({
   const [isDeleting, setIsDeleting] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isViewOpen, setIsViewOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-  const handleDelete = async (e?: React.MouseEvent) => {
-    e?.stopPropagation()
-    const isConfirmed = window.confirm(DELETE_NOTE_CONFIRM_MESSAGE)
-    if (!isConfirmed) return
+  const handleDelete = async () => {
     setIsDeleting(true)
     try {
       await deleteNote(id)
@@ -109,9 +117,33 @@ function WikiCard({
           setIsViewOpen(false)
           setIsEditOpen(true)
         }}
-        onDelete={handleDelete}
+        onDelete={(e) => {
+          e?.stopPropagation()
+          setIsViewOpen(false)
+          setIsDeleteDialogOpen(true)
+        }}
         note={{ title, content, block_type, stage_name, created_at }}
       />
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{DELETE_CONFIRM_TITLE}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {DELETE_CONFIRM_DESCRIPTION}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700 text-white border-none"
+            >
+              삭제하기
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {isEditOpen && (
         <NoteModal
