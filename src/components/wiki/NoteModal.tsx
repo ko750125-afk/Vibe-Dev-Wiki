@@ -49,7 +49,7 @@ const extensions = [
   }),
 ]
 
-import { Extension } from '@tiptap/core'
+// import { Extension } from '@tiptap/core'
 
 interface ToolbarButtonProps {
   icon: React.ElementType

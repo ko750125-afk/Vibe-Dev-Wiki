@@ -16,8 +16,9 @@ interface WikiContainerProps {
 
 const SEARCH_RESULT_LABEL = '전체 검색 결과'
 
-const buildSearchTarget = (note: WikiNote) =>
-  `${note.title} ${note.content} ${note.stage_name}`.toLowerCase()
+const stripHtml = (html: string) => {
+  return html.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim()
+}
 
 export default function WikiContainer({ initialNotes, initialSectors, currentSectorId, isAdmin }: WikiContainerProps) {
   const [searchQuery, setSearchQuery] = useState('')
@@ -25,6 +26,14 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
   
   // URL 또는 탭 클릭에 의한 로컬 상태 관리
   const [activeSectorId, setActiveSectorId] = useState(currentSectorId)
+
+  // 검색 최적화: 검색용 텍스트 미리 계산 (최초 1회 또는 initialNotes 변경 시에만)
+  const notesWithSearchTarget = useMemo(() => {
+    return initialNotes.map(note => ({
+      ...note,
+      searchTarget: `${note.title} ${stripHtml(note.content)} ${note.stage_name}`.toLowerCase()
+    }))
+  }, [initialNotes])
 
   // 부모 컴포넌트(서버)에서 받은 초기값이 변경되면 동기화
   useEffect(() => {
@@ -61,10 +70,10 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
   const filteredNotes = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
     if (normalizedQuery) {
-      return initialNotes.filter((note) => buildSearchTarget(note).includes(normalizedQuery))
+      return notesWithSearchTarget.filter((note) => note.searchTarget.includes(normalizedQuery))
     }
-    return initialNotes.filter((note) => note.sector_id === activeSectorId)
-  }, [initialNotes, searchQuery, activeSectorId])
+    return notesWithSearchTarget.filter((note) => note.sector_id === activeSectorId)
+  }, [notesWithSearchTarget, searchQuery, activeSectorId])
 
   return (
     <main className="flex-1 overflow-y-auto pb-20 custom-scrollbar bg-background">

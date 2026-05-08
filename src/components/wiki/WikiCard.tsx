@@ -1,4 +1,6 @@
-import { useState } from 'react'
+'use client'
+
+import { useState, memo } from 'react'
 import { cn } from '@/lib/utils'
 import { deleteNote } from '@/app/actions'
 import NoteModal from './NoteModal'
@@ -7,14 +9,6 @@ import { BlockType } from '@/lib/types'
 
 const DELETE_NOTE_CONFIRM_MESSAGE =
   '⚠️ [경고] 지식 삭제\n\n작성하신 소중한 노하우가 영구적으로 삭제됩니다.\n정말로 삭제하시겠습니까?'
-
-const sanitizeSummary = (raw: string) =>
-  raw
-    .replace(/<[^>]*>?/gm, ' ') // Strip HTML tags
-    .replace(/[#>*`[\]\-]/g, ' ') // Strip Markdown tags
-    .replace(/\((.*?)\)/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
 
 interface WikiCardProps {
   id: string
@@ -46,7 +40,7 @@ const HighlightText = ({ text, query }: { text: string; query?: string }) => {
   )
 }
 
-export default function WikiCard({ 
+function WikiCard({ 
   id, 
   title, 
   content, 
@@ -131,3 +125,5 @@ export default function WikiCard({
     </>
   )
 }
+
+export default memo(WikiCard)
