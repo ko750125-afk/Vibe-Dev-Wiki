@@ -6,6 +6,7 @@ import WikiCard from './WikiCard'
 import EmptyState from './EmptyState'
 import AdminControls from './AdminControls'
 import { WikiNote, WikiSector } from '@/lib/types'
+import { stripHtml } from '@/lib/utils'
 
 interface WikiContainerProps {
   initialNotes: WikiNote[]
@@ -15,10 +16,6 @@ interface WikiContainerProps {
 }
 
 const SEARCH_RESULT_LABEL = '전체 검색 결과'
-
-const stripHtml = (html: string) => {
-  return html.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim()
-}
 
 export default function WikiContainer({ initialNotes, initialSectors, currentSectorId, isAdmin }: WikiContainerProps) {
   const [searchQuery, setSearchQuery] = useState('')

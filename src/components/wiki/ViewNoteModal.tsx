@@ -9,6 +9,7 @@ import {
 import { BlockType } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { Edit3, Trash2 } from 'lucide-react'
+import { WIKI_PROSE_CLASSES } from '@/lib/constants'
 
 interface ViewNoteModalProps {
   isOpen: boolean
@@ -24,15 +25,7 @@ interface ViewNoteModalProps {
   }
 }
 
-const proseClass = cn(
-  "prose max-w-none dark:prose-invert",
-  "prose-headings:tracking-tight prose-headings:text-foreground prose-headings:font-bold",
-  "prose-p:my-2 prose-p:leading-relaxed text-foreground/90",
-  "prose-pre:bg-slate-900 prose-pre:border prose-pre:border-white/5",
-  "prose-a:text-primary prose-a:underline",
-  "prose-ul:my-4 prose-ol:my-4 prose-li:my-1",
-  "whitespace-pre-wrap break-words"
-)
+const proseClass = cn(WIKI_PROSE_CLASSES)
 
 export default function ViewNoteModal({ isOpen, onClose, onEdit, onDelete, note }: ViewNoteModalProps) {
   const handleEditClick = (e: React.MouseEvent<HTMLButtonElement>) => {
