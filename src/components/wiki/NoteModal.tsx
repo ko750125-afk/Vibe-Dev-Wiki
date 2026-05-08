@@ -221,6 +221,7 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
                     icon={isUploading ? Loader2 : ImageIcon} 
                     title="Upload Image" 
                     disabled={isUploading} 
+                    isActive={false}
                     onClick={() => document.getElementById('image-upload')?.click()} 
                   />
                 </div>
