@@ -17,8 +17,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-const DELETE_CONFIRM_TITLE = '⚠️ 지식 삭제 확인'
-const DELETE_CONFIRM_DESCRIPTION = '작성하신 소중한 노하우가 영구적으로 삭제됩니다. 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
+const DELETE_CONFIRM_TITLE = '삭제 확인'
+const DELETE_CONFIRM_DESCRIPTION = '정말로 삭제하시겠습니까?'
 
 interface WikiCardProps {
   id: string

@@ -34,8 +34,8 @@ interface SidebarProps {
   initialSectors: WikiSector[]
 }
 
-const DELETE_SECTOR_TITLE = '⚠️ 기술 스택 삭제'
-const DELETE_SECTOR_DESCRIPTION = '이 기술 스택을 삭제하면 해당 분류에 저장된 모든 지식 정보들이 함께 삭제되거나 연결을 잃게 됩니다. 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
+const DELETE_SECTOR_TITLE = '삭제 확인'
+const DELETE_SECTOR_DESCRIPTION = '정말로 삭제하시겠습니까?'
 
 const startsWithEnglish = (value: string) => /^[A-Za-z]/.test(value)
 
