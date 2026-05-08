@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Sidebar from '@/components/navigation/Sidebar'
 import { Suspense } from 'react'
 import { getNotes, getSectors } from './actions'
+// Vercel deployment trigger
 import WikiContainer from '@/components/wiki/WikiContainer'
 import { getAuthContext } from '@/lib/auth'
 
