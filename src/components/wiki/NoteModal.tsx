@@ -96,6 +96,11 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
       attributes: {
         class: 'prose max-w-none dark:prose-invert prose-headings:tracking-tight prose-pre:bg-slate-900 prose-pre:border prose-pre:border-white/5 whitespace-pre-wrap prose-p:my-2 prose-p:leading-relaxed prose-li:my-1 prose-ul:my-4 prose-ol:my-4 prose-stone prose-headings:text-foreground text-foreground/90 prose-a:text-primary prose-a:underline outline-none min-h-full h-full',
       },
+      // 붙여넣기 시 원본의 스타일(색상 등)을 강제로 제거하는 핸들러 추가
+      transformPastedHTML(html) {
+        // 스타일 속성과 클래스 속성을 제거하여 순수 HTML 태그만 남깁니다.
+        return html.replace(/ style="[^"]*"/g, '').replace(/ class="[^"]*"/g, '')
+      },
     },
   })
 
