@@ -36,16 +36,12 @@ const extensions = [
   }),
   Placeholder.configure({
     placeholder: ({ node }) => {
-      if (node.type.name === 'heading' && node.attrs.level === 3) {
-        return '요약설명'
+      if (node.type.name === 'heading') {
+        return '소제목을 입력하세요...'
       }
-      if (node.type.name === 'paragraph') {
-        return '상세내용'
-      }
-      return ''
+      return '상세 내용을 입력하세요...'
     },
     showOnlyWhenEditable: true,
-    includeChildren: true,
   }),
 ]
 
@@ -105,8 +101,7 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
 
   useEffect(() => {
     if (isOpen) {
-      const defaultContent = '<h3></h3><hr><p></p>'
-      const contentToSet = initialData?.content || defaultContent
+      const contentToSet = initialData?.content || ''
 
       updateFormData({
         title: initialData?.title || '',

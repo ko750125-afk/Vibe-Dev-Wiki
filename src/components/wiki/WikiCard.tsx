@@ -53,10 +53,6 @@ function WikiCard({
   const [isDeleting, setIsDeleting] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isViewOpen, setIsViewOpen] = useState(false)
-  
-  // <hr> 태그를 기준으로 위쪽은 설명, 아래쪽은 본문으로 간주
-  const contentParts = content.split(/<hr[^>]*>/i)
-  const descriptionHTML = contentParts[0]?.trim() || '<p>설명이 없습니다.</p>'
 
   const handleDelete = async (e?: React.MouseEvent) => {
     e?.stopPropagation()
