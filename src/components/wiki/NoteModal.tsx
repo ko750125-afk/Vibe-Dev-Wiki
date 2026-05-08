@@ -189,7 +189,29 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
 
             {/* Toolbar */}
             {editor && (
-              <div className="flex items-center gap-1 p-3 px-8 bg-muted/20 border-b border-border shrink-0 overflow-x-auto">
+              <div className="flex items-center gap-1 p-2.5 px-8 bg-muted/20 border-b border-border shrink-0 overflow-x-auto no-scrollbar">
+                {/* Image Upload Group - Moved to front for visibility */}
+                <div className="flex items-center gap-0.5 pr-4 mr-4 border-r border-border shrink-0">
+                  <input
+                    type="file"
+                    id="image-upload"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (file) await handleImageUpload(file)
+                      e.target.value = ''
+                    }}
+                  />
+                  <ToolbarButton 
+                    icon={isUploading ? Loader2 : ImageIcon} 
+                    title="이미지 업로드" 
+                    disabled={isUploading} 
+                    isActive={false}
+                    onClick={() => document.getElementById('image-upload')?.click()} 
+                  />
+                </div>
+
                 <div className="flex items-center gap-0.5 pr-4 mr-4 border-r border-border shrink-0">
                   <ToolbarButton icon={Heading1} title="Heading 1" isActive={editor.isActive('heading', { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} />
                   <ToolbarButton icon={Heading2} title="Heading 2" isActive={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} />
@@ -204,26 +226,6 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
                   <ToolbarButton icon={ListOrdered} title="Ordered List" isActive={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} />
                   <ToolbarButton icon={Code} title="Code Block" isActive={editor.isActive('codeBlock')} onClick={() => editor.chain().focus().toggleCodeBlock().run()} />
                   <ToolbarButton icon={Quote} title="Blockquote" isActive={editor.isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()} />
-                </div>
-                <div className="flex items-center gap-0.5 shrink-0">
-                  <input
-                    type="file"
-                    id="image-upload"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0]
-                      if (file) await handleImageUpload(file)
-                      e.target.value = ''
-                    }}
-                  />
-                  <ToolbarButton 
-                    icon={isUploading ? Loader2 : ImageIcon} 
-                    title="Upload Image" 
-                    disabled={isUploading} 
-                    isActive={false}
-                    onClick={() => document.getElementById('image-upload')?.click()} 
-                  />
                 </div>
               </div>
             )}
