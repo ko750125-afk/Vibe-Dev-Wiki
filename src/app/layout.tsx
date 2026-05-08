@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,19 +31,18 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+              for (let registration of registrations) {
+                registration.unregister();
+              }
+            });
+          }
+        `}} />
+      </head>
       <body className="min-h-full flex flex-col">
-        {/* Service Worker strategy: keep fully disabled (non-PWA mode). */}
-        <Script id="sw-cleanup" strategy="beforeInteractive">
-          {`
-            if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                for (let registration of registrations) {
-                  registration.unregister();
-                }
-              });
-            }
-          `}
-        </Script>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

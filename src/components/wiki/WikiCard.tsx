@@ -10,7 +10,8 @@ const DELETE_NOTE_CONFIRM_MESSAGE =
 
 const sanitizeSummary = (raw: string) =>
   raw
-    .replace(/[#>*`[\]\-]/g, ' ')
+    .replace(/<[^>]*>?/gm, ' ') // Strip HTML tags
+    .replace(/[#>*`[\]\-]/g, ' ') // Strip Markdown tags
     .replace(/\((.*?)\)/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
@@ -58,8 +59,10 @@ export default function WikiCard({
   const [isDeleting, setIsDeleting] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isViewOpen, setIsViewOpen] = useState(false)
-  const plainSummary = sanitizeSummary(content)
-  const descriptionText = (stage_name || plainSummary || '설명이 없습니다.').trim()
+  
+  // <hr> 태그를 기준으로 위쪽은 설명, 아래쪽은 본문으로 간주
+  const contentParts = content.split(/<hr[^>]*>/i)
+  const descriptionHTML = contentParts[0]?.trim() || '<p>설명이 없습니다.</p>'
 
   const handleDelete = async (e?: React.MouseEvent) => {
     e?.stopPropagation()
@@ -80,21 +83,21 @@ export default function WikiCard({
       <div 
         onClick={() => setIsViewOpen(true)}
         className={cn(
-          "group relative flex h-52 cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-background transition-colors hover:bg-accent/30",
+          "group relative flex flex-col sm:flex-row sm:items-stretch cursor-pointer overflow-hidden rounded-xl border border-border bg-background transition-all hover:bg-accent/30 hover:shadow-sm",
           isDeleting && "opacity-50 grayscale pointer-events-none"
         )}
       >
-        <div className="p-5">
-          <h3 className="line-clamp-2 text-base font-semibold leading-snug text-foreground">
+        <div className="w-full sm:w-1/3 sm:min-w-[200px] sm:max-w-[300px] p-4 sm:p-5 border-b sm:border-b-0 sm:border-r border-border bg-muted/20 flex flex-col justify-center">
+          <h3 className="text-xl font-bold leading-snug text-foreground break-words">
             <HighlightText text={title} query={searchTerm} />
           </h3>
         </div>
 
-        <div className="mx-5 border-t border-border" />
-        <div className="flex-1 p-5 pt-4">
-          <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-            <HighlightText text={descriptionText} query={searchTerm} />
-          </p>
+        <div className="flex-1 p-4 sm:p-5 flex items-start sm:items-center min-w-0">
+          <div 
+            className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-foreground prose-p:leading-relaxed text-muted-foreground break-words w-full"
+            dangerouslySetInnerHTML={{ __html: descriptionHTML }}
+          />
         </div>
       </div>
 

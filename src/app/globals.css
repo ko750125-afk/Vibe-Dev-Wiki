@@ -109,3 +109,24 @@
     @apply bg-background text-foreground transition-colors duration-500 ease-in-out;
   }
 }
+
+/* Tiptap Placeholder Styling */
+.tiptap .is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--muted-foreground);
+  pointer-events: none;
+  height: 0;
+  opacity: 0.6;
+}
+
+/* Hide placeholder when focused (클릭하면 없어지게) */
+.tiptap .is-empty:focus::before {
+  opacity: 0;
+}
+
+/* ProseMirror Core Styles */
+.ProseMirror {
+  white-space: pre-wrap !important;
+  outline: none;
+}

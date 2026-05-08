@@ -22,11 +22,28 @@ const buildSearchTarget = (note: WikiNote) =>
 export default function WikiContainer({ initialNotes, initialSectors, currentSectorId, isAdmin }: WikiContainerProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
+  
+  // URL 또는 탭 클릭에 의한 로컬 상태 관리
+  const [activeSectorId, setActiveSectorId] = useState(currentSectorId)
+
+  // 부모 컴포넌트(서버)에서 받은 초기값이 변경되면 동기화
+  useEffect(() => {
+    setActiveSectorId(currentSectorId)
+  }, [currentSectorId])
+
+  // 사이드바에서 발생시킨 커스텀 이벤트 수신
+  useEffect(() => {
+    const handleSectorChange = (e: CustomEvent<number>) => {
+      setActiveSectorId(e.detail)
+    }
+    window.addEventListener('sectorChange', handleSectorChange as EventListener)
+    return () => window.removeEventListener('sectorChange', handleSectorChange as EventListener)
+  }, [])
 
   // 현재 선택된 섹터 정보 (DB 데이터에서 찾음)
   const currentSector = useMemo(() => 
-    initialSectors.find(s => s.id === currentSectorId) || (initialSectors.length > 0 ? initialSectors[0] : { name: 'Wiki', icon: 'Sparkles' })
-  , [currentSectorId, initialSectors])
+    initialSectors.find(s => s.id === activeSectorId) || (initialSectors.length > 0 ? initialSectors[0] : { name: 'Wiki', icon: 'Sparkles' })
+  , [activeSectorId, initialSectors])
 
   // Cmd+K 단축키
   useEffect(() => {
@@ -46,8 +63,8 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
     if (normalizedQuery) {
       return initialNotes.filter((note) => buildSearchTarget(note).includes(normalizedQuery))
     }
-    return initialNotes.filter((note) => note.sector_id === currentSectorId)
-  }, [initialNotes, searchQuery, currentSectorId])
+    return initialNotes.filter((note) => note.sector_id === activeSectorId)
+  }, [initialNotes, searchQuery, activeSectorId])
 
   return (
     <main className="flex-1 overflow-y-auto pb-20 custom-scrollbar bg-background">
@@ -89,7 +106,7 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
 
         <div className="w-[180px] flex justify-end">
           <AdminControls
-            sectorId={currentSectorId}
+            sectorId={activeSectorId}
             className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
           />
         </div>
@@ -97,7 +114,7 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
 
       <div className="p-8 max-w-7xl mx-auto">
         {filteredNotes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {filteredNotes.map((note) => {
               return (
                 <WikiCard

@@ -47,7 +47,8 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   
-  const currentSectorId = Number(searchParams.get('sector')) || (initialSectors.length > 0 ? initialSectors[0].id : 0)
+  const currentSectorIdFromUrl = Number(searchParams.get('sector')) || (initialSectors.length > 0 ? initialSectors[0].id : 0)
+  const [currentSectorId, setCurrentSectorId] = useState(currentSectorIdFromUrl)
 
   const [activeCategoryId, setActiveCategoryId] = useState<number>(1)
   const [pendingSectorId, setPendingSectorId] = useState<number | null>(null)
@@ -55,6 +56,31 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
   const [editValue, setEditValue] = useState('')
   const [isAdding, setIsAdding] = useState(false)
   const [newValue, setNewValue] = useState('')
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  // URL 파라미터 변경 시 초기화
+  useEffect(() => {
+    setCurrentSectorId(currentSectorIdFromUrl)
+  }, [currentSectorIdFromUrl])
+
+  // 커스텀 이벤트 (sectorChange) 수신을 통한 상태 동기화
+  useEffect(() => {
+    const handleSectorChange = (e: CustomEvent<number>) => {
+      setCurrentSectorId(e.detail)
+    }
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search)
+      const id = Number(params.get('sector')) || (initialSectors.length > 0 ? initialSectors[0].id : 0)
+      setCurrentSectorId(id)
+      window.dispatchEvent(new CustomEvent('sectorChange', { detail: id }))
+    }
+    window.addEventListener('sectorChange', handleSectorChange as EventListener)
+    window.addEventListener('popstate', handlePopState)
+    return () => {
+      window.removeEventListener('sectorChange', handleSectorChange as EventListener)
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [initialSectors])
 
   // 현재 선택된 섹터에 맞춰 카테고리 탭 활성화
   useEffect(() => {
@@ -72,11 +98,11 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
   , [activeCategoryId, initialSectors])
 
   const handleSectorClick = (id: number) => {
+    setIsMobileMenuOpen(false)
     if (id === currentSectorId) return
-    setPendingSectorId(id)
-    startTransition(() => {
-      router.push(`/?sector=${id}`)
-    })
+    setCurrentSectorId(id)
+    window.history.pushState(null, '', `/?sector=${id}`)
+    window.dispatchEvent(new CustomEvent('sectorChange', { detail: id }))
   }
 
   // --- CRUD 기능 ---
@@ -112,9 +138,17 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
   }
 
   return (
-    <aside className="h-screen flex bg-background text-foreground sticky top-0 z-50 border-r border-border">
-      {/* 1. Icon Rail (좌측 아이콘 레일) */}
-      <div className="w-[64px] border-r border-border flex flex-col items-center py-4 gap-4 bg-secondary">
+    <>
+      {/* 모바일 배경 오버레이 */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-background/50 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+      <aside className="h-screen flex bg-background text-foreground sticky top-0 z-50 border-r border-border w-[64px] md:w-auto">
+        {/* 1. Icon Rail (좌측 아이콘 레일) */}
+        <div className="w-[64px] border-r border-border flex flex-col items-center py-4 gap-4 bg-secondary z-50">
         <div className="h-10 mb-4 flex items-center justify-center">
           <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg shadow-sm" />
         </div>
@@ -126,7 +160,14 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
             return (
               <button
                 key={cat.id}
-                onClick={() => setActiveCategoryId(cat.id)}
+                onClick={() => {
+                  if (isActive) {
+                    setIsMobileMenuOpen(!isMobileMenuOpen)
+                  } else {
+                    setActiveCategoryId(cat.id)
+                    setIsMobileMenuOpen(true)
+                  }
+                }}
                 className={cn(
                   "p-2.5 rounded-lg transition-all relative group",
                   isActive ? "bg-accent text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
@@ -151,7 +192,10 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
       </div>
 
       {/* 2. Navigation Menu (상세 메뉴 패널) */}
-      <div className="w-[270px] flex flex-col border-r border-border bg-background">
+      <div className={cn(
+        "absolute left-[64px] top-0 h-screen w-[270px] flex flex-col border-r border-border bg-background shadow-xl md:shadow-none transition-transform duration-300 ease-in-out md:relative md:left-0 z-40",
+        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      )}>
         <div className="p-6 flex-1 overflow-y-auto custom-scrollbar">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-black text-foreground uppercase tracking-wide">
@@ -277,5 +321,6 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
         </div>
       </div>
     </aside>
+    </>
   )
 }
