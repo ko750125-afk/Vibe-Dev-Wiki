@@ -160,7 +160,7 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
         hideClose 
-        className="max-w-4xl w-[95vw] bg-background border-border rounded-[24px] p-0 overflow-hidden shadow-2xl flex flex-col h-[85vh] h-[85dvh] max-h-[90dvh] sm:max-h-[85vh]"
+        className="max-w-4xl w-full sm:w-[95vw] bg-background border-border sm:rounded-[24px] p-0 overflow-hidden shadow-2xl flex flex-col h-full sm:h-[85vh] sm:h-[85dvh] sm:max-h-[85vh] top-0 sm:top-[50%] translate-y-0 sm:-translate-y-[50%] rounded-none"
       >
         <div className="sr-only">
           <DialogTitle>{initialData ? '지식 수정' : '새 지식 등록'}</DialogTitle>
@@ -168,65 +168,66 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden bg-background">
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <DialogHeader className="px-8 py-5 border-b border-border bg-background shrink-0 sticky top-0 z-30">
-              <input
-                required
-                type="text"
-                value={formData.title}
-                onChange={(e) => updateFormData({ title: e.target.value })}
-                placeholder="제목"
-                className="w-full bg-transparent border-none outline-none text-2xl font-bold text-foreground placeholder:text-muted-foreground"
-              />
-            </DialogHeader>
+          <div className="flex-1 flex flex-col overflow-hidden relative">
+            {/* Header & Toolbar Sticky Container */}
+            <div className="sticky top-0 z-30 bg-background border-b border-border shadow-sm">
+              <DialogHeader className="px-6 sm:px-8 py-4 sm:py-5 bg-background">
+                <input
+                  required
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => updateFormData({ title: e.target.value })}
+                  placeholder="제목"
+                  className="w-full bg-transparent border-none outline-none text-xl sm:text-2xl font-bold text-foreground placeholder:text-muted-foreground"
+                />
+              </DialogHeader>
 
+              {/* Toolbar */}
+              {editor && (
+                <div className="flex items-center gap-1 p-2.5 px-6 sm:px-8 bg-muted/5 border-t border-border/50 shrink-0 overflow-x-auto no-scrollbar">
+                  {/* Image Upload Group */}
+                  <div className="flex items-center gap-0.5 pr-3 sm:pr-4 mr-3 sm:mr-4 border-r border-border shrink-0">
+                    <input
+                      type="file"
+                      id="image-upload"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (file) await handleImageUpload(file)
+                        e.target.value = ''
+                      }}
+                    />
+                    <ToolbarButton 
+                      icon={isUploading ? Loader2 : ImageIcon} 
+                      title="이미지 업로드" 
+                      disabled={isUploading} 
+                      isActive={false}
+                      onClick={() => document.getElementById('image-upload')?.click()} 
+                    />
+                  </div>
 
-
-            {/* Toolbar */}
-            {editor && (
-              <div className="flex items-center gap-1 p-2.5 px-8 bg-background/95 backdrop-blur-sm border-b border-border shrink-0 overflow-x-auto no-scrollbar sticky top-[73px] z-20">
-                {/* Image Upload Group - Moved to front for visibility */}
-                <div className="flex items-center gap-0.5 pr-4 mr-4 border-r border-border shrink-0">
-                  <input
-                    type="file"
-                    id="image-upload"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0]
-                      if (file) await handleImageUpload(file)
-                      e.target.value = ''
-                    }}
-                  />
-                  <ToolbarButton 
-                    icon={isUploading ? Loader2 : ImageIcon} 
-                    title="이미지 업로드" 
-                    disabled={isUploading} 
-                    isActive={false}
-                    onClick={() => document.getElementById('image-upload')?.click()} 
-                  />
+                  <div className="flex items-center gap-0.5 pr-3 sm:pr-4 mr-3 sm:mr-4 border-r border-border shrink-0">
+                    <ToolbarButton icon={Heading1} title="Heading 1" isActive={editor.isActive('heading', { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} />
+                    <ToolbarButton icon={Heading2} title="Heading 2" isActive={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} />
+                    <ToolbarButton icon={Heading3} title="Heading 3" isActive={editor.isActive('heading', { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} />
+                  </div>
+                  <div className="flex items-center gap-0.5 pr-3 sm:pr-4 mr-3 sm:mr-4 border-r border-border shrink-0">
+                    <ToolbarButton icon={Bold} title="Bold" isActive={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()} />
+                    <ToolbarButton icon={Italic} title="Italic" isActive={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()} />
+                  </div>
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <ToolbarButton icon={List} title="Bullet List" isActive={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()} />
+                    <ToolbarButton icon={ListOrdered} title="Ordered List" isActive={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} />
+                    <ToolbarButton icon={Code} title="Code Block" isActive={editor.isActive('codeBlock')} onClick={() => editor.chain().focus().toggleCodeBlock().run()} />
+                    <ToolbarButton icon={Quote} title="Blockquote" isActive={editor.isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()} />
+                  </div>
                 </div>
-
-                <div className="flex items-center gap-0.5 pr-4 mr-4 border-r border-border shrink-0">
-                  <ToolbarButton icon={Heading1} title="Heading 1" isActive={editor.isActive('heading', { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} />
-                  <ToolbarButton icon={Heading2} title="Heading 2" isActive={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} />
-                  <ToolbarButton icon={Heading3} title="Heading 3" isActive={editor.isActive('heading', { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} />
-                </div>
-                <div className="flex items-center gap-0.5 pr-4 mr-4 border-r border-border shrink-0">
-                  <ToolbarButton icon={Bold} title="Bold" isActive={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()} />
-                  <ToolbarButton icon={Italic} title="Italic" isActive={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()} />
-                </div>
-                <div className="flex items-center gap-0.5 pr-4 mr-4 border-r border-border shrink-0">
-                  <ToolbarButton icon={List} title="Bullet List" isActive={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()} />
-                  <ToolbarButton icon={ListOrdered} title="Ordered List" isActive={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} />
-                  <ToolbarButton icon={Code} title="Code Block" isActive={editor.isActive('codeBlock')} onClick={() => editor.chain().focus().toggleCodeBlock().run()} />
-                  <ToolbarButton icon={Quote} title="Blockquote" isActive={editor.isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()} />
-                </div>
-              </div>
-            )}
+              )}
+            </div>
 
             <div 
-              className="flex-1 overflow-y-auto px-8 py-6 bg-background custom-scrollbar"
+              className="flex-1 overflow-y-auto px-6 sm:px-8 py-6 bg-background custom-scrollbar"
               onDrop={async (e) => {
                 e.preventDefault()
                 const file = e.dataTransfer.files[0]
@@ -235,23 +236,25 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
               onDragOver={(e) => e.preventDefault()}
             >
               <EditorContent editor={editor} className="h-full" />
+              {/* Extra spacing for mobile keyboard */}
+              <div className="h-32 sm:hidden" />
             </div>
 
             {/* Action Buttons */}
-            <div className="p-6 px-8 border-t border-border bg-background shrink-0">
+            <div className="p-4 sm:p-6 px-6 sm:px-8 border-t border-border bg-background shrink-0 pb-safe">
               <div className="flex gap-3 justify-end">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={onClose}
-                  className="w-32 h-11 rounded-lg text-sm font-medium border border-border bg-background text-foreground hover:bg-accent transition-colors"
+                  className="flex-1 sm:flex-initial sm:w-32 h-11 rounded-lg text-sm font-medium border border-border bg-background text-foreground hover:bg-accent transition-colors"
                 >
                   CANCEL
                 </Button>
                 <Button
                   disabled={loading}
                   type="submit"
-                  className="w-32 h-11 rounded-lg text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors"
+                  className="flex-1 sm:flex-initial sm:w-32 h-11 rounded-lg text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors"
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'SAVE'}
                 </Button>
