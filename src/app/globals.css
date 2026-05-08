@@ -132,15 +132,16 @@
 }
 
 /* 
-  Prose Content Style Reset
-  외부 컨텐츠 복사 시 딸려오는 인라인 색상 스타일(특히 흰색 등)이 
-  앱 테마를 방해하지 않도록 강제 리셋합니다.
+  Prose Content Style Reset (Aggressive)
+  외부에서 유입된 모든 인라인 색상 스타일을 무력화하고 
+  부모(테마)의 색상을 따르도록 강제합니다.
 */
-.prose [style*="color"] {
-  color: inherit !important;
+.prose, .prose * {
+  color: var(--foreground) !important;
 }
 
-/* 다크모드/라이트모드 전환 시에도 본문 색상이 유동적으로 변하도록 보장 */
-.prose {
-  color: var(--foreground) !important;
+/* 링크는 예외적으로 테마의 기본 링크 색상을 따르도록 처리 */
+.prose a, .prose a * {
+  color: var(--primary) !important;
+  text-decoration: underline;
 }
