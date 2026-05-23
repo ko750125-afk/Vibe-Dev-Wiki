@@ -1,14 +1,14 @@
 import { type NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   return await updateSession(request)
 }
 
 export const config = {
   matcher: [
     /*
-     * 아래 경로를 제외한 모든 요청에 대해 미들웨어 실행:
+     * 아래 경로를 제외한 모든 요청에 대해 프록시 실행:
      * - _next/static (정적 파일)
      * - _next/image (이미지 최적화 파일)
      * - favicon.ico (파비콘 파일)

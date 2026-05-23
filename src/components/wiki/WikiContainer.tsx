@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
-import { Search, X } from 'lucide-react'
+import { useState, useMemo, useEffect, useRef, useTransition } from 'react'
+import { Search, X, Loader2 } from 'lucide-react'
 import WikiCard from './WikiCard'
 import EmptyState from './EmptyState'
 import AdminControls from './AdminControls'
 import { WikiNote, WikiSector } from '@/lib/types'
-import { stripHtml } from '@/lib/utils'
+import { searchAllNotes } from '@/app/actions'
 
 interface WikiContainerProps {
   initialNotes: WikiNote[]
@@ -25,31 +25,17 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
   // URL 또는 탭 클릭에 의한 로컬 상태 관리
   const [activeSectorId, setActiveSectorId] = useState(currentSectorId)
 
+  const [searchResults, setSearchResults] = useState<WikiNote[]>([])
+  const [isSearching, startTransition] = useTransition()
+
   useEffect(() => {
     setIsMounted(true)
   }, [])
-
-  // 검색 최적화: 검색용 텍스트 미리 계산 (최초 1회 또는 initialNotes 변경 시에만)
-  const notesWithSearchTarget = useMemo(() => {
-    return initialNotes.map(note => ({
-      ...note,
-      searchTarget: `${note.title} ${stripHtml(note.content)} ${note.stage_name}`.toLowerCase()
-    }))
-  }, [initialNotes])
 
   // 부모 컴포넌트(서버)에서 받은 초기값이 변경되면 동기화
   useEffect(() => {
     setActiveSectorId(currentSectorId)
   }, [currentSectorId])
-
-  // 사이드바에서 발생시킨 커스텀 이벤트 수신
-  useEffect(() => {
-    const handleSectorChange = (e: CustomEvent<number>) => {
-      setActiveSectorId(e.detail)
-    }
-    window.addEventListener('sectorChange', handleSectorChange as EventListener)
-    return () => window.removeEventListener('sectorChange', handleSectorChange as EventListener)
-  }, [])
 
   // 현재 선택된 섹터 정보 (DB 데이터에서 찾음)
   const currentSector = useMemo(() => 
@@ -68,14 +54,23 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  // 검색어가 있으면 전체 검색, 없으면 현재 섹터 기준으로 표시
-  const filteredNotes = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase()
-    if (normalizedQuery) {
-      return notesWithSearchTarget.filter((note) => note.searchTarget.includes(normalizedQuery))
-    }
-    return notesWithSearchTarget.filter((note) => note.sector_id === activeSectorId)
-  }, [notesWithSearchTarget, searchQuery, activeSectorId])
+  // 검색어 디바운스 및 서버 검색
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const q = searchQuery.trim()
+      if (q) {
+        startTransition(async () => {
+          const results = await searchAllNotes(q)
+          setSearchResults(results)
+        })
+      } else {
+        setSearchResults([])
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  const displayNotes = searchQuery.trim() ? searchResults : initialNotes
 
   if (!isMounted) {
     return (
@@ -143,9 +138,14 @@ export default function WikiContainer({ initialNotes, initialSectors, currentSec
       </header>
 
       <div className="p-8 max-w-7xl mx-auto">
-        {filteredNotes.length > 0 ? (
+        {isSearching ? (
+          <div className="flex flex-col gap-3 justify-center items-center py-20 text-muted-foreground">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p>검색 중...</p>
+          </div>
+        ) : displayNotes.length > 0 ? (
           <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {filteredNotes.map((note) => {
+            {displayNotes.map((note) => {
               return (
                 <WikiCard
                   key={note.id}

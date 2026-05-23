@@ -95,6 +95,24 @@ export async function getNotes(sectorId: number): Promise<WikiNote[]> {
   return data as WikiNote[]
 }
 
+export async function searchAllNotes(queryStr: string): Promise<WikiNote[]> {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from('vibe_wiki_notes')
+    .select('*')
+    .or(`title.ilike.%${queryStr}%,content.ilike.%${queryStr}%,stage_name.ilike.%${queryStr}%`)
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  if (error) {
+    console.error('[searchAllNotes] Error:', error.message)
+    return []
+  }
+
+  return data as WikiNote[]
+}
+
 export async function addNote(payload: NotePayload & { sector_id: number }) {
   const { supabase, user } = await ensureAdmin()
   

@@ -25,8 +25,8 @@ export default async function HomePage({
   // 2. 현재 선택된 섹터 ID 결정 (없으면 첫 번째 섹터)
   const currentSectorId = Number(sector) || (sectors.length > 0 ? sectors[0].id : 0)
 
-  // 3. 모든 노트 가져오기 (전체 검색용)
-  const notes = await getNotes(0) 
+  // 3. 현재 섹터의 노트만 가져오기
+  const notes = await getNotes(currentSectorId)
 
   return (
     <div className="flex min-h-screen bg-background">

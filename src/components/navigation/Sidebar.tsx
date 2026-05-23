@@ -77,25 +77,6 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
     setCurrentSectorId(currentSectorIdFromUrl)
   }, [currentSectorIdFromUrl])
 
-  // 커스텀 이벤트 (sectorChange) 수신을 통한 상태 동기화
-  useEffect(() => {
-    const handleSectorChange = (e: CustomEvent<number>) => {
-      setCurrentSectorId(e.detail)
-    }
-    const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search)
-      const id = Number(params.get('sector')) || (initialSectors.length > 0 ? initialSectors[0].id : 0)
-      setCurrentSectorId(id)
-      window.dispatchEvent(new CustomEvent('sectorChange', { detail: id }))
-    }
-    window.addEventListener('sectorChange', handleSectorChange as EventListener)
-    window.addEventListener('popstate', handlePopState)
-    return () => {
-      window.removeEventListener('sectorChange', handleSectorChange as EventListener)
-      window.removeEventListener('popstate', handlePopState)
-    }
-  }, [initialSectors])
-
   // 현재 선택된 섹터에 맞춰 카테고리 탭 활성화
   useEffect(() => {
     const currentSector = initialSectors.find(s => s.id === currentSectorId)
@@ -115,8 +96,10 @@ export default function Sidebar({ userEmail, isAdmin, initialSectors }: SidebarP
     setIsMobileMenuOpen(false)
     if (id === currentSectorId) return
     setCurrentSectorId(id)
-    window.history.pushState(null, '', `/?sector=${id}`)
-    window.dispatchEvent(new CustomEvent('sectorChange', { detail: id }))
+    setPendingSectorId(id)
+    startTransition(() => {
+      router.push(`/?sector=${id}`, { scroll: false })
+    })
   }
 
   // --- CRUD 기능 ---

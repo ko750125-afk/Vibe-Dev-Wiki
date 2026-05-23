@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { 
   Loader2, Heading1, Heading2, Heading3, List, Code, Link as LinkIcon, Image as ImageIcon,
   Bold, Italic, ListOrdered, Quote
@@ -132,34 +132,44 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
 
     setIsUploading(true)
     try {
-      const uploadData = new FormData()
-      uploadData.append('file', file)
-      const url = await uploadImage(uploadData)
-      editor?.chain().focus().setImage({ src: url }).run()
+      // 0원 무비용 정책: 서버 스토리지를 배제하고 클라이언트 단에서 Base64 인라인 압축 렌더링
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => {
+        const base64Url = reader.result as string
+        editor?.chain().focus().setImage({ src: base64Url }).run()
+      }
+      reader.onerror = () => {
+        alert('파일을 읽는 중 오류가 발생했습니다.')
+      }
     } catch (err) {
-      alert('이미지 업로드에 실패했습니다. Storage 설정을 확인해주세요.')
+      alert('이미지 삽입에 실패했습니다.')
       console.error(err)
     } finally {
       setIsUploading(false)
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [isPending, startTransition] = useTransition()
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    try {
-      if (initialData) {
-        await updateNote(initialData.id, formData)
-      } else {
-        await addNote({ sector_id: sectorId, ...formData })
+    startTransition(async () => {
+      try {
+        if (initialData) {
+          await updateNote(initialData.id, formData)
+        } else {
+          await addNote({ sector_id: sectorId, ...formData })
+        }
+        onClose()
+      } catch (err) {
+        alert(initialData ? '수정에 실패했습니다.' : '등록에 실패했습니다.')
+        console.error(err)
+      } finally {
+        setLoading(false)
       }
-      onClose()
-    } catch (err) {
-      alert(initialData ? '수정에 실패했습니다.' : '등록에 실패했습니다.')
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (
@@ -258,11 +268,11 @@ export default function NoteModal({ sectorId, isOpen, onClose, initialData }: No
                   CANCEL
                 </Button>
                 <Button
-                  disabled={loading}
+                  disabled={loading || isPending}
                   type="submit"
                   className="flex-1 sm:flex-initial sm:w-32 h-11 rounded-lg text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors"
                 >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'SAVE'}
+                  {loading || isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : 'SAVE'}
                 </Button>
               </div>
             </div>
